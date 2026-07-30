@@ -1,0 +1,692 @@
+{
+ "actions": [],
+ "creation": "2026-07-29 12:00:00.000000",
+ "description": "Storefront, payment, SMS and sync configuration for Prime Shito",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "business_tab",
+  "business_name",
+  "tagline",
+  "about_text",
+  "business_cb",
+  "logo",
+  "hero_image",
+  "contact_section",
+  "support_phone",
+  "whatsapp_number",
+  "contact_cb",
+  "support_email",
+  "currency",
+  "store_section",
+  "is_store_open",
+  "store_closed_message",
+  "seo_section",
+  "meta_description",
+  "og_image",
+  "ordering_tab",
+  "min_order_amount",
+  "max_qty_per_line",
+  "max_lines_per_order",
+  "ordering_cb",
+  "delivery_lead_days",
+  "order_cutoff_time",
+  "payment_options_section",
+  "allow_online_payment",
+  "allow_pay_on_delivery",
+  "payment_options_cb",
+  "pod_max_order_amount",
+  "unpaid_order_expiry_minutes",
+  "paystack_tab",
+  "paystack_enabled",
+  "paystack_environment",
+  "paystack_cb",
+  "paystack_public_key",
+  "paystack_secret_key",
+  "paystack_config_section",
+  "paystack_channels",
+  "paystack_fallback_email_domain",
+  "paystack_webhook_url",
+  "sms_tab",
+  "sms_enabled",
+  "sms_sandbox",
+  "sms_cb",
+  "arkesel_sender_id",
+  "arkesel_api_key",
+  "arkesel_base_url",
+  "sms_cost_section",
+  "sms_daily_cap",
+  "sms_cost_per_segment",
+  "sms_cost_cb",
+  "sms_dr_secret",
+  "otp_section",
+  "otp_length",
+  "otp_ttl_seconds",
+  "otp_max_attempts",
+  "otp_resend_cooldown_seconds",
+  "otp_cb",
+  "otp_max_per_phone_per_day",
+  "otp_global_daily_budget",
+  "otp_echo_in_dev",
+  "templates_tab",
+  "templates_help",
+  "tpl_otp",
+  "tpl_order_received",
+  "tpl_payment_pending",
+  "tpl_payment_confirmed",
+  "tpl_order_approved",
+  "tpl_out_for_delivery",
+  "tpl_order_completed",
+  "tpl_order_cancelled",
+  "tpl_order_expired",
+  "tpl_status_update",
+  "erp_tab",
+  "erp_sync_enabled",
+  "erp_company",
+  "erp_cost_center",
+  "erp_cb",
+  "erp_customer_group",
+  "erp_territory",
+  "erp_price_list",
+  "erp_items_section",
+  "erp_item_group",
+  "erp_warehouse",
+  "erp_create_stock_items",
+  "erp_items_cb",
+  "erp_delivery_charge_item",
+  "erp_accounts_section",
+  "erp_receivable_account",
+  "erp_paid_to_account",
+  "erp_accounts_cb",
+  "erp_mode_of_payment_online",
+  "erp_mode_of_payment_pod"
+ ],
+ "fields": [
+  {
+   "fieldname": "business_tab",
+   "fieldtype": "Tab Break",
+   "label": "Business"
+  },
+  {
+   "default": "Prime Shito",
+   "fieldname": "business_name",
+   "fieldtype": "Data",
+   "label": "Business Name",
+   "reqd": 1
+  },
+  {
+   "description": "One line shown under the logo on the home page",
+   "fieldname": "tagline",
+   "fieldtype": "Data",
+   "label": "Tagline"
+  },
+  {
+   "fieldname": "about_text",
+   "fieldtype": "Small Text",
+   "label": "About Text"
+  },
+  {
+   "fieldname": "business_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "hero_image",
+   "fieldtype": "Attach Image",
+   "label": "Hero Image"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "support_phone",
+   "fieldtype": "Data",
+   "label": "Support Phone",
+   "options": "Phone"
+  },
+  {
+   "description": "Used for the floating WhatsApp order button. Digits only, e.g. 233241234567",
+   "fieldname": "whatsapp_number",
+   "fieldtype": "Data",
+   "label": "WhatsApp Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "contact_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "support_email",
+   "fieldtype": "Data",
+   "label": "Support Email",
+   "options": "Email"
+  },
+  {
+   "default": "GHS",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "store_section",
+   "fieldtype": "Section Break",
+   "label": "Store Status"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_store_open",
+   "fieldtype": "Check",
+   "label": "Store Is Open"
+  },
+  {
+   "default": "We are not taking orders right now. Please check back soon.",
+   "depends_on": "eval:!doc.is_store_open",
+   "fieldname": "store_closed_message",
+   "fieldtype": "Small Text",
+   "label": "Store Closed Message"
+  },
+  {
+   "fieldname": "seo_section",
+   "fieldtype": "Section Break",
+   "label": "SEO and Social Sharing"
+  },
+  {
+   "description": "Shown in Google results and WhatsApp link previews",
+   "fieldname": "meta_description",
+   "fieldtype": "Small Text",
+   "label": "Meta Description"
+  },
+  {
+   "description": "Recommended 1200x630. Shown when the link is shared on WhatsApp.",
+   "fieldname": "og_image",
+   "fieldtype": "Attach Image",
+   "label": "Social Share Image"
+  },
+  {
+   "fieldname": "ordering_tab",
+   "fieldtype": "Tab Break",
+   "label": "Ordering"
+  },
+  {
+   "fieldname": "min_order_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Order Amount"
+  },
+  {
+   "default": "50",
+   "fieldname": "max_qty_per_line",
+   "fieldtype": "Int",
+   "label": "Max Quantity Per Line"
+  },
+  {
+   "default": "20",
+   "fieldname": "max_lines_per_order",
+   "fieldtype": "Int",
+   "label": "Max Lines Per Order"
+  },
+  {
+   "fieldname": "ordering_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "2",
+   "fieldname": "delivery_lead_days",
+   "fieldtype": "Int",
+   "label": "Delivery Lead Days"
+  },
+  {
+   "description": "Orders after this time are treated as next-day",
+   "fieldname": "order_cutoff_time",
+   "fieldtype": "Time",
+   "label": "Daily Order Cutoff Time"
+  },
+  {
+   "fieldname": "payment_options_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Options"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_online_payment",
+   "fieldtype": "Check",
+   "label": "Allow Online Payment"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_pay_on_delivery",
+   "fieldtype": "Check",
+   "label": "Allow Pay on Delivery"
+  },
+  {
+   "fieldname": "payment_options_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "allow_pay_on_delivery",
+   "description": "Largest order allowed on pay-on-delivery. 0 = no cap.",
+   "fieldname": "pod_max_order_amount",
+   "fieldtype": "Currency",
+   "label": "Pay on Delivery Cap"
+  },
+  {
+   "default": "60",
+   "description": "Online orders left unpaid this long are expired and their stock released",
+   "fieldname": "unpaid_order_expiry_minutes",
+   "fieldtype": "Int",
+   "label": "Unpaid Order Expiry (Minutes)"
+  },
+  {
+   "fieldname": "paystack_tab",
+   "fieldtype": "Tab Break",
+   "label": "Paystack"
+  },
+  {
+   "fieldname": "paystack_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Paystack"
+  },
+  {
+   "default": "Test",
+   "fieldname": "paystack_environment",
+   "fieldtype": "Select",
+   "label": "Environment",
+   "options": "Test\nLive"
+  },
+  {
+   "fieldname": "paystack_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "paystack_enabled",
+   "fieldname": "paystack_public_key",
+   "fieldtype": "Data",
+   "label": "Public Key"
+  },
+  {
+   "depends_on": "paystack_enabled",
+   "fieldname": "paystack_secret_key",
+   "fieldtype": "Password",
+   "label": "Secret Key"
+  },
+  {
+   "fieldname": "paystack_config_section",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "default": "mobile_money,card",
+   "description": "Comma separated. Paystack Ghana supports mobile_money and card.",
+   "fieldname": "paystack_channels",
+   "fieldtype": "Small Text",
+   "label": "Channels"
+  },
+  {
+   "description": "Paystack requires an email. Customers who give none get &lt;phone&gt;@&lt;this domain&gt;. Use a domain you own.",
+   "fieldname": "paystack_fallback_email_domain",
+   "fieldtype": "Data",
+   "label": "Fallback Email Domain"
+  },
+  {
+   "description": "Register this exact URL in your Paystack dashboard",
+   "fieldname": "paystack_webhook_url",
+   "fieldtype": "Data",
+   "label": "Webhook URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sms_tab",
+   "fieldtype": "Tab Break",
+   "label": "SMS"
+  },
+  {
+   "fieldname": "sms_enabled",
+   "fieldtype": "Check",
+   "label": "Enable SMS"
+  },
+  {
+   "default": "1",
+   "description": "Log messages without sending or being billed",
+   "fieldname": "sms_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "sms_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Max 11 characters. Must be pre-approved by Arkesel or messages are rejected.",
+   "fieldname": "arkesel_sender_id",
+   "fieldtype": "Data",
+   "label": "Sender ID"
+  },
+  {
+   "fieldname": "arkesel_api_key",
+   "fieldtype": "Password",
+   "label": "API Key"
+  },
+  {
+   "default": "https://sms.arkesel.com",
+   "fieldname": "arkesel_base_url",
+   "fieldtype": "Data",
+   "label": "Base URL"
+  },
+  {
+   "fieldname": "sms_cost_section",
+   "fieldtype": "Section Break",
+   "label": "Cost Control"
+  },
+  {
+   "default": "1000",
+   "fieldname": "sms_daily_cap",
+   "fieldtype": "Int",
+   "label": "Daily Message Cap"
+  },
+  {
+   "default": "0.03",
+   "fieldname": "sms_cost_per_segment",
+   "fieldtype": "Currency",
+   "label": "Cost Per Segment"
+  },
+  {
+   "fieldname": "sms_cost_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Shared secret embedded in the delivery-report callback URL",
+   "fieldname": "sms_dr_secret",
+   "fieldtype": "Password",
+   "label": "Delivery Report Secret"
+  },
+  {
+   "fieldname": "otp_section",
+   "fieldtype": "Section Break",
+   "label": "Phone Verification"
+  },
+  {
+   "default": "6",
+   "fieldname": "otp_length",
+   "fieldtype": "Int",
+   "label": "OTP Length"
+  },
+  {
+   "default": "300",
+   "fieldname": "otp_ttl_seconds",
+   "fieldtype": "Int",
+   "label": "OTP Lifetime (Seconds)"
+  },
+  {
+   "default": "5",
+   "fieldname": "otp_max_attempts",
+   "fieldtype": "Int",
+   "label": "Max Verify Attempts"
+  },
+  {
+   "default": "60",
+   "fieldname": "otp_resend_cooldown_seconds",
+   "fieldtype": "Int",
+   "label": "Resend Cooldown (Seconds)"
+  },
+  {
+   "fieldname": "otp_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "5",
+   "fieldname": "otp_max_per_phone_per_day",
+   "fieldtype": "Int",
+   "label": "Max OTPs Per Phone Per Day"
+  },
+  {
+   "default": "2000",
+   "description": "Hard stop across all phones. Protects against a distributed SMS cost attack.",
+   "fieldname": "otp_global_daily_budget",
+   "fieldtype": "Int",
+   "label": "Global Daily OTP Budget"
+  },
+  {
+   "default": "1",
+   "description": "Return the code in the API response when developer_mode is on, so testing burns no credit",
+   "fieldname": "otp_echo_in_dev",
+   "fieldtype": "Check",
+   "label": "Echo OTP In Developer Mode"
+  },
+  {
+   "fieldname": "templates_tab",
+   "fieldtype": "Tab Break",
+   "label": "SMS Templates"
+  },
+  {
+   "fieldname": "templates_help",
+   "fieldtype": "HTML",
+   "options": "<p>Jinja templates. Available: <code>{{ code }}</code> (tracking code), <code>{{ total }}</code>, <code>{{ name }}</code>, <code>{{ status }}</code>, <code>{{ url }}</code>, <code>{{ support }}</code>.</p><p><b>Write GHS, never the cedi symbol.</b> The cedi sign is not in the GSM-7 alphabet, so a single one shrinks the message from 160 characters to 70 and roughly doubles the cost of every message sent.</p>"
+  },
+  {
+   "default": "{{ otp }} is your Prime Shito code. Valid {{ mins }} mins. Do not share it.",
+   "fieldname": "tpl_otp",
+   "fieldtype": "Small Text",
+   "label": "OTP"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} received. {{ n }} item(s), GHS {{ total }}, pay on delivery. We will confirm shortly. Track: {{ url }}",
+   "fieldname": "tpl_order_received",
+   "fieldtype": "Small Text",
+   "label": "Order Received"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} created. Pay GHS {{ total }} here: {{ pay_url }} Link expires in {{ mins }} mins.",
+   "fieldname": "tpl_payment_pending",
+   "fieldtype": "Small Text",
+   "label": "Payment Pending"
+  },
+  {
+   "default": "Prime Shito: Payment of GHS {{ paid }} received for order {{ code }}. Thank you! We will confirm your delivery soon.",
+   "fieldname": "tpl_payment_confirmed",
+   "fieldtype": "Small Text",
+   "label": "Payment Confirmed"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} APPROVED. Delivery to {{ zone }}. Total GHS {{ total }} ({{ pay_state }}). Help: {{ support }}",
+   "fieldname": "tpl_order_approved",
+   "fieldtype": "Small Text",
+   "label": "Order Approved"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} is out for delivery today.{% if due %} Please have GHS {{ due }} ready.{% endif %}",
+   "fieldname": "tpl_out_for_delivery",
+   "fieldtype": "Small Text",
+   "label": "Out for Delivery"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} delivered. Enjoy your shito! Reorder anytime at {{ site }}. Thank you.",
+   "fieldname": "tpl_order_completed",
+   "fieldtype": "Small Text",
+   "label": "Order Completed"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} was cancelled. {{ reason }} Call {{ support }} if this is a mistake.",
+   "fieldname": "tpl_order_cancelled",
+   "fieldtype": "Small Text",
+   "label": "Order Cancelled"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} expired unpaid. Still want it? Pay here: {{ pay_url }}",
+   "fieldname": "tpl_order_expired",
+   "fieldtype": "Small Text",
+   "label": "Order Expired"
+  },
+  {
+   "default": "Prime Shito: Order {{ code }} is now {{ status }}. Payment: {{ payment_status }}. Total GHS {{ total }}.",
+   "fieldname": "tpl_status_update",
+   "fieldtype": "Small Text",
+   "label": "Status Update (Fallback)"
+  },
+  {
+   "fieldname": "erp_tab",
+   "fieldtype": "Tab Break",
+   "label": "ERPNext Sync"
+  },
+  {
+   "fieldname": "erp_sync_enabled",
+   "fieldtype": "Check",
+   "label": "Enable ERPNext Sync"
+  },
+  {
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "erp_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Individual",
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "default": "Standard Selling",
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_price_list",
+   "fieldtype": "Link",
+   "label": "Selling Price List",
+   "options": "Price List"
+  },
+  {
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "default": "Products",
+   "fieldname": "erp_item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "erp_warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "description": "Off by default. Leaving this off keeps Sales Order submission from ever failing on missing stock or valuation.",
+   "fieldname": "erp_create_stock_items",
+   "fieldtype": "Check",
+   "label": "Create Packs as Stock Items"
+  },
+  {
+   "fieldname": "erp_items_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Non-stock service item used to carry the delivery fee as a Sales Order line",
+   "fieldname": "erp_delivery_charge_item",
+   "fieldtype": "Link",
+   "label": "Delivery Charge Item",
+   "options": "Item"
+  },
+  {
+   "depends_on": "erp_sync_enabled",
+   "fieldname": "erp_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "erp_receivable_account",
+   "fieldtype": "Link",
+   "label": "Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "erp_paid_to_account",
+   "fieldtype": "Link",
+   "label": "Paid To Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "erp_accounts_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Mobile Money",
+   "fieldname": "erp_mode_of_payment_online",
+   "fieldtype": "Link",
+   "label": "Mode of Payment (Online)",
+   "options": "Mode of Payment"
+  },
+  {
+   "default": "Pay on Delivery",
+   "fieldname": "erp_mode_of_payment_pod",
+   "fieldtype": "Link",
+   "label": "Mode of Payment (On Delivery)",
+   "options": "Mode of Payment"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-29 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Prime Shito",
+ "name": "Prime Shito Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

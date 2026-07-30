@@ -1,0 +1,47 @@
+<template>
+	<div class="flex min-h-screen flex-col">
+		<AppHeader />
+
+		<div
+			v-if="!store.is_store_open"
+			class="bg-char-900 px-4 py-2.5 text-center text-sm text-cream-100"
+			role="status"
+		>
+			{{ store.store_closed_message || 'We are not taking orders right now.' }}
+		</div>
+
+		<main class="flex-1">
+			<router-view v-slot="{ Component }">
+				<component :is="Component" @catalog-loaded="onCatalogLoaded" />
+			</router-view>
+		</main>
+
+		<AppFooter />
+		<WhatsAppFab :packs="packs" />
+	</div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+import AppHeader from './components/AppHeader.vue';
+import AppFooter from './components/AppFooter.vue';
+import WhatsAppFab from './components/WhatsAppFab.vue';
+import { store } from './lib/boot';
+import type { Pack } from './lib/types';
+
+export default defineComponent({
+	name: 'App',
+	components: { AppHeader, AppFooter, WhatsAppFab },
+	data() {
+		return { store, packs: [] as Pack[] };
+	},
+	methods: {
+		// Views emit this once they have the catalog, so the WhatsApp message can
+		// name packs instead of codes without a second network request.
+		onCatalogLoaded(packs: Pack[]) {
+			if (Array.isArray(packs) && packs.length) this.packs = packs;
+		}
+	}
+});
+</script>

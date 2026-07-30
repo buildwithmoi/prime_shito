@@ -1,0 +1,313 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:pack_code",
+ "creation": "2026-07-29 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pack_code",
+  "pack_name",
+  "route",
+  "pack_cb",
+  "is_active",
+  "is_featured",
+  "display_order",
+  "description_section",
+  "description",
+  "long_description",
+  "media_section",
+  "image",
+  "media_cb",
+  "image_alt",
+  "spec_section",
+  "flavour",
+  "heat_level",
+  "net_weight_g",
+  "spec_cb",
+  "uom",
+  "shelf_life_days",
+  "pricing_section",
+  "price",
+  "compare_at_price",
+  "pricing_cb",
+  "min_order_qty",
+  "max_order_qty",
+  "availability_section",
+  "available_from",
+  "available_upto",
+  "preorder_cutoff",
+  "availability_cb",
+  "track_availability",
+  "available_qty",
+  "reserved_qty",
+  "erp_section",
+  "erpnext_item"
+ ],
+ "fields": [
+  {
+   "description": "Also used as the ERPNext Item code. Short and stable, e.g. SHITO-CLASSIC-250",
+   "fieldname": "pack_code",
+   "fieldtype": "Data",
+   "label": "Pack Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "pack_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pack Name",
+   "reqd": 1
+  },
+  {
+   "description": "Generated from the name if left blank",
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "URL Slug",
+   "unique": 1
+  },
+  {
+   "fieldname": "pack_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "is_featured",
+   "fieldtype": "Check",
+   "label": "Featured on Home Page"
+  },
+  {
+   "fieldname": "display_order",
+   "fieldtype": "Int",
+   "label": "Display Order"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "description": "Shown on the pack card",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Short Description"
+  },
+  {
+   "fieldname": "long_description",
+   "fieldtype": "Text Editor",
+   "label": "Full Description"
+  },
+  {
+   "fieldname": "media_section",
+   "fieldtype": "Section Break",
+   "label": "Images"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Main Image"
+  },
+  {
+   "fieldname": "media_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image_alt",
+   "fieldtype": "Attach Image",
+   "label": "Second Image"
+  },
+  {
+   "fieldname": "spec_section",
+   "fieldtype": "Section Break",
+   "label": "Specification"
+  },
+  {
+   "fieldname": "flavour",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Flavour",
+   "options": "Classic\nBeef\nChicken\nFish\nDried Fish\nVegetarian"
+  },
+  {
+   "fieldname": "heat_level",
+   "fieldtype": "Select",
+   "label": "Heat Level",
+   "options": "Mild\nMedium\nHot\nExtra Hot"
+  },
+  {
+   "fieldname": "net_weight_g",
+   "fieldtype": "Int",
+   "label": "Net Weight (g)"
+  },
+  {
+   "fieldname": "spec_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Nos",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Unit of Measure",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "shelf_life_days",
+   "fieldtype": "Int",
+   "label": "Shelf Life (Days)"
+  },
+  {
+   "fieldname": "pricing_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price",
+   "reqd": 1
+  },
+  {
+   "description": "Optional. Shown struck through next to the price.",
+   "fieldname": "compare_at_price",
+   "fieldtype": "Currency",
+   "label": "Compare At Price"
+  },
+  {
+   "fieldname": "pricing_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "min_order_qty",
+   "fieldtype": "Int",
+   "label": "Minimum Order Quantity"
+  },
+  {
+   "default": "0",
+   "description": "0 = unlimited",
+   "fieldname": "max_order_qty",
+   "fieldtype": "Int",
+   "label": "Maximum Order Quantity"
+  },
+  {
+   "fieldname": "availability_section",
+   "fieldtype": "Section Break",
+   "label": "Availability"
+  },
+  {
+   "fieldname": "available_from",
+   "fieldtype": "Date",
+   "label": "Available From"
+  },
+  {
+   "fieldname": "available_upto",
+   "fieldtype": "Date",
+   "label": "Available Until"
+  },
+  {
+   "description": "Last moment an order for this pack can join the next production batch",
+   "fieldname": "preorder_cutoff",
+   "fieldtype": "Datetime",
+   "label": "Pre-order Cutoff"
+  },
+  {
+   "fieldname": "availability_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "track_availability",
+   "fieldtype": "Check",
+   "label": "Track Availability"
+  },
+  {
+   "depends_on": "track_availability",
+   "fieldname": "available_qty",
+   "fieldtype": "Int",
+   "label": "Available Quantity",
+   "read_only": 1
+  },
+  {
+   "depends_on": "track_availability",
+   "fieldname": "reserved_qty",
+   "fieldtype": "Int",
+   "label": "Reserved Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "erp_section",
+   "fieldtype": "Section Break",
+   "label": "ERPNext"
+  },
+  {
+   "fieldname": "erpnext_item",
+   "fieldtype": "Link",
+   "label": "ERPNext Item",
+   "options": "Item",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-shopping-bag",
+ "image_field": "image",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-07-29 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Prime Shito",
+ "name": "Shito Pack",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Sales",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "pack_name,flavour",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "pack_name",
+ "track_changes": 1
+}

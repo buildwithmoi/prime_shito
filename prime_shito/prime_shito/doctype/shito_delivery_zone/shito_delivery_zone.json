@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:zone_name",
+ "creation": "2026-07-29 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "zone_name",
+  "region",
+  "is_active",
+  "display_order",
+  "zone_cb",
+  "delivery_fee",
+  "free_delivery_over",
+  "min_order_amount",
+  "timing_section",
+  "estimated_days",
+  "delivery_days",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "zone_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Zone Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Region",
+   "options": "Greater Accra\nAshanti\nCentral\nEastern\nWestern\nWestern North\nVolta\nOti\nNorthern\nSavannah\nNorth East\nUpper East\nUpper West\nBono\nBono East\nAhafo"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "display_order",
+   "fieldtype": "Int",
+   "label": "Display Order"
+  },
+  {
+   "fieldname": "zone_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_fee",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Delivery Fee",
+   "reqd": 1
+  },
+  {
+   "description": "Orders at or above this amount ship free. 0 = never free.",
+   "fieldname": "free_delivery_over",
+   "fieldtype": "Currency",
+   "label": "Free Delivery Over"
+  },
+  {
+   "description": "Smallest order this zone accepts. 0 = no minimum.",
+   "fieldname": "min_order_amount",
+   "fieldtype": "Currency",
+   "label": "Minimum Order Amount"
+  },
+  {
+   "fieldname": "timing_section",
+   "fieldtype": "Section Break",
+   "label": "Timing"
+  },
+  {
+   "default": "2",
+   "fieldname": "estimated_days",
+   "fieldtype": "Int",
+   "label": "Estimated Days"
+  },
+  {
+   "description": "Free text shown to the customer, e.g. \"Saturdays only\"",
+   "fieldname": "delivery_days",
+   "fieldtype": "Small Text",
+   "label": "Delivery Days"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Internal Notes"
+  }
+ ],
+ "icon": "fa fa-truck",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-07-29 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Prime Shito",
+ "name": "Shito Delivery Zone",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Sales",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Dispatch",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

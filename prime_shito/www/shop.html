@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/prime_shito/shop/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#c1272d" />
+    <title>Prime Shito</title>
+    <script type="module" crossorigin src="/assets/prime_shito/shop/assets/index-MpMjUBgC.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/prime_shito/shop/assets/_plugin-vue_export-helper-Os0g2bKS.js">
+    <link rel="stylesheet" crossorigin href="/assets/prime_shito/shop/assets/index-D0YujRDP.css">
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!--
+      Boot payload rendered by prime_shito/www/shop.py.
+
+      The scaffold read the CSRF token straight off frappe.session in Jinja,
+      which never resolved: there, frappe.session is the session *data* dict,
+      and guests carry no persisted CSRF token at all. Both values now come
+      from get_context(). (Do not write Jinja expressions in this comment --
+      the template engine evaluates them even inside HTML comments.)
+
+      The `boot is defined` guard keeps `yarn dev` working, where Vite serves
+      this file directly with no Jinja rendering.
+    -->
+    {% if boot is defined %}
+    <script>
+      window.csrf_token = {{ boot.csrf_token | tojson }};
+      window.__PRIME__ = {{ boot | tojson }};
+    </script>
+    {% endif %}
+
+    <noscript>
+      <div style="max-width:32rem;margin:3rem auto;padding:0 1rem;font-family:system-ui,sans-serif;color:#1b1a19">
+        <h1 style="font-size:1.5rem;margin:0 0 .5rem">Prime Shito</h1>
+        <p style="color:#57534e;line-height:1.5">
+          This shop needs JavaScript. Some data-saving browsers turn it off.
+          You can still order by messaging or calling us.
+        </p>
+      </div>
+    </noscript>
+
+  </body>
+</html>

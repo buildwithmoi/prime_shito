@@ -256,3 +256,44 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+
+# Installation
+# ------------
+
+after_install = "prime_shito.install.after_install"
+
+# Website
+# -------
+# The storefront IS the main website, so the SPA is the home page.
+home_page = "shop"
+
+# Explicit routes rather than a `/<path:app_path>` catch-all. A root catch-all
+# would shadow /login, /me, /update-password, ERPNext's /orders portal pages and
+# every future www/ page, and would defeat Frappe's 404 caching.
+website_route_rules = [
+	{"from_route": "/packs", "to_route": "shop"},
+	{"from_route": "/packs/<path:app_path>", "to_route": "shop"},
+	{"from_route": "/cart", "to_route": "shop"},
+	{"from_route": "/checkout", "to_route": "shop"},
+	{"from_route": "/checkout/<path:app_path>", "to_route": "shop"},
+	{"from_route": "/track", "to_route": "shop"},
+	{"from_route": "/track/<path:app_path>", "to_route": "shop"},
+	{"from_route": "/payment/<path:app_path>", "to_route": "shop"},
+	{"from_route": "/about", "to_route": "shop"},
+	{"from_route": "/contact", "to_route": "shop"},
+	{"from_route": "/unsubscribe", "to_route": "shop"},
+]
+
+# Document Events
+# ---------------
+
+doc_events = {
+	"Shito Pack": {
+		"on_update": "prime_shito.api.catalog.clear_storefront_cache",
+		"on_trash": "prime_shito.api.catalog.clear_storefront_cache",
+	},
+	"Shito Delivery Zone": {
+		"on_update": "prime_shito.api.catalog.clear_storefront_cache",
+		"on_trash": "prime_shito.api.catalog.clear_storefront_cache",
+	},
+}

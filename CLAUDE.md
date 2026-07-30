@@ -1,0 +1,171 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this repo is
+
+`prime_shito` is a Frappe v16 app for **Prime Shito**, a Ghanaian manufacturer of shito (pepper
+sauce). It is an online pre-order storefront: customers browse packs, order ahead of production, pay
+online or on delivery, get SMS at each step, and look up their own order by tracking code. The
+business owner works out of the Frappe Desk.
+
+The app lives inside a bench at `/home/patoo/fb-16-2` alongside `frappe` and `erpnext`. Two halves:
+
+- `prime_shito/` — the Python package Frappe loads.
+- `prime/` — a Vue 3 + TypeScript + Vite SPA. **It is the site's home page**, not a sub-route.
+
+Currency is **GHS** throughout. The business is **not VAT-registered**, so there are no tax lines.
+
+## Commands
+
+Backend commands run from the **bench root** (`/home/patoo/fb-16-2`); frontend from `prime/`.
+The site is `local.16.2` (web 8002, socketio 9002) and `developer_mode` is on.
+
+```bash
+# bench root
+bench --site local.16.2 migrate                 # sync doctype JSON -> DB
+bench --site local.16.2 clear-website-cache     # after changing www/ or hooks
+bench --site local.16.2 execute prime_shito.install.create_demo_data
+bench --site local.16.2 run-tests --module prime_shito.prime_shito.doctype.shito_pack.test_shito_pack
+
+# app root
+cd prime && yarn build      # -> prime_shito/public/shop/ + prime_shito/www/shop.html
+cd prime && yarn dev        # vite on :8080, proxied to the bench
+cd prime && yarn type-check # vue-tsc; catches real bugs, run before committing
+
+# lint (matches CI's pre-commit)
+/home/patoo/fb-16-2/env/bin/python -m ruff check prime_shito/
+/home/patoo/fb-16-2/env/bin/python -m ruff format prime_shito/
+```
+
+**`bench build` is not needed for the SPA.** `sites/assets/prime_shito` is already a symlink to
+`prime_shito/public/`, so `yarn build` output is served immediately. Only run it if you add
+`public/js` esbuild bundles.
+
+## Architecture
+
+### The SPA is the website root
+
+Four coupled pieces — changing one without the others breaks the site:
+
+1. `prime/vite.config.ts` builds to `prime_shito/public/shop/` with base `/assets/prime_shito/shop/`.
+2. `prime/package.json`'s `copy-html-entry` copies the built `index.html` to
+   `prime_shito/www/shop.html`, making `shop` a Frappe website page.
+3. `hooks.py` sets `home_page = "shop"` plus **explicit** `website_route_rules` for `/packs`,
+   `/cart`, `/checkout`, `/track`, etc. Deliberately not a `/<path:app_path>` catch-all — that would
+   shadow `/login`, `/me`, ERPNext's `/orders` portal and every future `www/` page, and would defeat
+   Frappe's 404 caching. **Adding a client route means adding a rule here too.**
+4. `prime_shito/www/shop.py` renders the boot payload and `context.metatags`.
+
+`prime/src/router/index.ts` uses `createWebHistory('/')` to match.
+
+### Built assets are committed
+
+`prime_shito/public/shop/` and `prime_shito/www/shop.html` are in git on purpose: Frappe does not run
+the app's `yarn build` during deploy, so without them a fresh clone serves a broken home page.
+**After changing anything under `prime/src/`, run `yarn build` and commit the output**, or the
+deployed site silently keeps the old bundle.
+
+### Money has exactly one authority
+
+`prime_shito/shito/pricing.py::compute()` is the only place a price is decided. Both `quote()` (what
+the cart calls on every change) and order placement go through it, so the cart can never disagree
+with what is charged.
+
+It **never** reads a rate, amount, fee or total from a request — only `[{pack, qty}]`. Order
+controllers call `pricing.apply_to_order()` unconditionally in `validate()`, including on staff saves
+in Desk. Marking a field `read_only` in DocType JSON does *not* stop an API caller from setting it;
+only recomputation does. Amounts destined for a payment gateway use `grand_total_pesewas`, an integer
+in minor units.
+
+### Guest API rules
+
+Endpoints live in `prime_shito/api/`. Frappe guest sessions carry **no persisted CSRF token**, so
+CSRF protects nothing here — rate limiting and server-side recomputation carry the whole load.
+
+- `@frappe.whitelist(allow_guest=True, methods=[...])` with `@rate_limit(...)` stacked underneath.
+  Note the import is `from frappe.rate_limiter import rate_limit`; there is no `frappe.rate_limit`.
+- Return explicit projections, never a Document or `as_dict()` — `Shito Pack` carries stock counters
+  and `Prime Shito Settings` carries API secrets.
+- No new doctype gets a Guest or All role. Guests reach data only through whitelisted projections.
+- Never whitelist anything that takes a doctype name, fieldname or filter dict from the caller.
+
+### SMS costs real money — keep messages GSM-7
+
+`prime_shito/shito/gsm.py` exists because one character outside the GSM-7 alphabet drops an SMS from
+160 characters per segment to 70, roughly doubling the cost of **every** message using it. The Ghana
+cedi sign is the trap. **Always write `GHS 120.00`, never `₵`.**
+
+This is enforced: `Prime Shito Settings.validate()` rejects non-GSM-7 characters in any `tpl_*`
+template, `pricing.money()` avoids `frappe.utils.fmt_money` (which prefixes the symbol), and a test
+asserts customer-facing error copy stays GSM-7. Any new customer-facing string must hold that line.
+
+SMS goes through **Frappe's built-in SMS Settings** (Core > SMS Settings) pointed at Arkesel's HTTP
+API — not a custom gateway. Note the built-in sender loops one HTTP request per recipient, which is
+fine for order notifications but will need Arkesel's bulk endpoint for advertisement campaigns.
+
+### The doppio libs are vendored, not imported
+
+`prime/src/lib/` holds our own `call.ts`, `socket.ts` and `boot.ts`. Do **not** reintroduce
+`../../../doppio/` imports. Three reasons they were removed:
+
+- doppio is not in the site's `installed_apps`; the imports only resolved because a sibling directory
+  happened to exist in this bench, so any clean checkout failed to build.
+- doppio's `call.js` redirects to `/login` on any 401/403. Its guard reads
+  `router.currentRoute.name`, but on vue-router 4 `currentRoute` is a `Ref`, so `.name` is always
+  `undefined` and the guard never fires — it bounced shoppers to a dead route. Ours throws instead.
+- doppio's `socket.js` hardcodes port 9000; this bench uses 9002. Ours reads it from the boot payload.
+
+### Frontend conventions
+
+Options API with `defineComponent`, Tailwind v4 via `@tailwindcss/vite` (CSS-first `@theme` tokens in
+`src/style.css`, no `tailwind.config.js`). Cart state is a module-level `reactive()` in
+`src/stores/cart.ts`, not Pinia.
+
+**The cart stores only `{pack, qty}` — never a price.** Displayed money comes from the last `quote()`.
+
+Gotcha worth knowing: do not put the `cart` object into a component's `data()`. Vue's reactive proxy
+auto-unwraps nested refs, so `cart.isEmpty` silently becomes a boolean while template code still
+reads `.value` off it, yielding `undefined`. Expose it through `computed` instead. `vue-tsc` catches
+this, which is why `yarn type-check` is worth running.
+
+Mobile-first is a requirement, not polish: most customers are on phones with metered data. System
+fonts only, route-level code splitting, `build.target: es2020`. Budget is **<150 KB gzipped JS** for
+first paint (currently ~43 KB).
+
+## Testing
+
+Frappe test files must live next to a doctype. Order/pricing tests are in
+`prime_shito/prime_shito/doctype/shito_pack/test_shito_pack.py`.
+
+That module sets `IGNORE_TEST_RECORD_DEPENDENCIES = ["UOM", "Item"]`, and new test modules touching
+ERPNext-linked doctypes will need the same. Without it, Frappe auto-generates test records for linked
+doctypes, which imports ERPNext's test modules — and `erpnext/tests/utils.py` instantiates
+`BootStrapTestData()` at module scope, which tries to recreate the `Standard Buying` price list in
+INR and crashes on any site that already has one.
+
+CI's "Find tests" step runs `grep -rn "def test"` and fails the whole job if the repo has no tests, so
+never let the suite reach zero.
+
+## ERPNext integration
+
+ERPNext **is** fully set up on this bench: Company "Prime Shito" (`PS`), GHS, Ghana, `Standard
+Selling` price list, warehouses `Finished Goods - PS` / `Stores - PS`, receivable
+`1310 - Debtors - PS`, cost center `Main - PS`, Item Group `Products`, Territory `Ghana`.
+`install.py` adds the missing "Mobile Money" and "Pay on Delivery" Modes of Payment.
+
+The planned order sync is **fail-soft by design**: it is enqueued with `enqueue_after_commit=True`,
+never raises into the order transaction, and records `sync_status = Skipped/Failed` instead. An order
+must never fail because ERPNext posting failed. Packs sync as `is_stock_item = 0` by default so Sales
+Order submission cannot fail on missing stock or valuation.
+
+There is **no Email Account** configured, so the app is SMS-only; do not add email receipts without
+setting one up first.
+
+## Conventions
+
+- **Python is tab-indented**, double-quoted, 110 columns, ruff-formatted, targeting py3.14.
+- Phone numbers: always normalise through `prime_shito/shito/phone.py`, which is Ghana-only by
+  design. Frappe's own `validate_phone_number_with_country_code` accepts international premium-rate
+  numbers, which on an OTP endpoint is a way for an attacker to run up an SMS bill.
+- Patches go in `prime_shito/patches.txt`.

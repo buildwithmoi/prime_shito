@@ -1,0 +1,28 @@
+{
+  "name": "prime",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base=/assets/prime_shito/shop/ && yarn copy-html-entry",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --build",
+    "copy-html-entry": "cp ../prime_shito/public/shop/index.html ../prime_shito/www/shop.html"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.5.1",
+    "vue": "^3.5.39",
+    "vue-router": "^4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4",
+    "@types/node": "^24.13.2",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/tsconfig": "^0.9.1",
+    "tailwindcss": "^4",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "vue-tsc": "^3.3.5"
+  }
+}
