@@ -90,6 +90,65 @@ CSRF protects nothing here — rate limiting and server-side recomputation carry
 - No new doctype gets a Guest or All role. Guests reach data only through whitelisted projections.
 - Never whitelist anything that takes a doctype name, fieldname or filter dict from the caller.
 
+### Orders: two transition paths that must not drift
+
+`Shito Order` is **not submittable**. It uses a Frappe Workflow purely for Desk
+UX (action buttons, role gating); every state is `doc_status = 0`. The submittable
+accounting artefact is the downstream ERPNext Sales Order.
+
+State changes happen two ways, and they cannot share a mechanism:
+
+- **Humans** click Approve/Dispatch/Complete in Desk → the Workflow, which checks
+  `Workflow Transition.allowed` against `frappe.session.user`.
+- **Machines** (payment callbacks, the expiry job) → `shito/state.py::transition()`,
+  which validates against the `ALLOWED` dict and saves as Administrator, because a
+  webhook running as Guest holds no workflow role.
+
+`ALLOWED` mirrors the Workflow record, and `test_shito_order.py::TestWorkflowParity`
+asserts they agree. **If you add a state or transition, change both.**
+
+Two Frappe constraints worth knowing before editing the workflow:
+
+- **The first state in `WORKFLOW_STATES` is where new orders start.** Frappe refuses
+  on insert to set any other state, and that check ignores roles entirely — there is
+  no flag or permission that bypasses it. `Awaiting Approval` must stay first.
+- `install.py::create_workflow()` rebuilds an existing workflow rather than skipping
+  it, so edits to those tables reach an installed site on the next migrate.
+
+Payment progress lives in `payment_status` (Unpaid/Pending/Paid/…), not in the
+workflow state. An unpaid online order is (Awaiting Approval, Pending).
+
+### Naming from a field runs before validate()
+
+`Shito Customer` uses `autoname: field:phone`, so the phone number *is* the primary
+key and duplicates are impossible at the database level. That guarantee only holds
+because normalisation happens in **`before_naming()`**, not `validate()` — Frappe
+derives the name first, so validating later would name the record from whatever raw
+string was typed ("024 111 2223" alongside "+233241112223" = two records, one person).
+Any future `field:`-named doctype needs the same treatment.
+
+### OTP is the main cost-attack surface
+
+Each `request_otp` spends real money. The defences are layered because each is
+individually defeatable: per-phone rate limit, per-IP rate limit, per-phone daily
+cap, and a **global daily budget** in Redis — the last one is what stops a
+distributed attack, which defeats both per-key limits by spreading requests.
+
+Codes are stored as `sha256(salt + code)`, compared with `hmac.compare_digest`, and
+the attempt counter increments *before* the comparison so a crash cannot buy free
+guesses. Verification tokens are single-use and burnt by `place_order`.
+
+With `developer_mode` on and `otp_echo_in_dev` set, `request_otp` returns the code
+in its response so local testing burns no SMS credit.
+
+### Order tracking must not leak
+
+`track_order` requires the tracking code **and** the last 4 phone digits. Wrong
+digits and an unknown code return an identical message *and* are padded to the same
+duration (`LOOKUP_FLOOR_SECONDS`), so neither can be enumerated by response
+differential. The response is a redacted projection: first name only, masked phone,
+truncated address. Never widen it to return the document.
+
 ### SMS costs real money — keep messages GSM-7
 
 `prime_shito/shito/gsm.py` exists because one character outside the GSM-7 alphabet drops an SMS from
@@ -138,11 +197,16 @@ first paint (currently ~43 KB).
 Frappe test files must live next to a doctype. Order/pricing tests are in
 `prime_shito/prime_shito/doctype/shito_pack/test_shito_pack.py`.
 
-That module sets `IGNORE_TEST_RECORD_DEPENDENCIES = ["UOM", "Item"]`, and new test modules touching
-ERPNext-linked doctypes will need the same. Without it, Frappe auto-generates test records for linked
-doctypes, which imports ERPNext's test modules — and `erpnext/tests/utils.py` instantiates
-`BootStrapTestData()` at module scope, which tries to recreate the `Standard Buying` price list in
-INR and crashes on any site that already has one.
+Every test module for a doctype with ERPNext links needs `IGNORE_TEST_RECORD_DEPENDENCIES`. Without
+it, Frappe auto-generates test records for linked doctypes, which imports ERPNext's test modules —
+and `erpnext/tests/utils.py` instantiates `BootStrapTestData()` at module scope, which tries to
+recreate the `Standard Buying` price list in INR and crashes on any site that already has one.
+
+The dependency walk is **recursive and reads the ignore list from each doctype's own test module**.
+So listing a doctype in one file does not protect the doctypes it links to: `Shito Customer` needed
+its own `test_shito_customer.py` with an ignore list purely because its `erp_customer` link would
+otherwise drag ERPNext in. If a new suite fails with a `Standard Buying` duplicate-entry error, this
+is why.
 
 CI's "Find tests" step runs `grep -rn "def test"` and fails the whole job if the repo has no tests, so
 never let the suite reach zero.

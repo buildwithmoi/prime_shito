@@ -23,6 +23,23 @@ const routes: RouteRecordRaw[] = [
 		component: () => import('../views/Cart.vue')
 	},
 	{
+		path: '/checkout',
+		name: 'Checkout',
+		component: () => import('../views/Checkout.vue')
+	},
+	{
+		path: '/track',
+		name: 'Track',
+		component: () => import('../views/Track.vue')
+	},
+	{
+		// SMS links land here with the code prefilled. The last 4 phone digits
+		// are still required, so a forwarded link cannot expose an address.
+		path: '/track/:code',
+		name: 'TrackCode',
+		component: () => import('../views/Track.vue')
+	},
+	{
 		path: '/about',
 		name: 'About',
 		component: () => import('../views/About.vue')

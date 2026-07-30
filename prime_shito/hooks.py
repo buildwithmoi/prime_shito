@@ -296,4 +296,46 @@ doc_events = {
 		"on_update": "prime_shito.api.catalog.clear_storefront_cache",
 		"on_trash": "prime_shito.api.catalog.clear_storefront_cache",
 	},
+	"Shito Order": {
+		# Fires the status SMS when a workflow action moves the order in Desk.
+		"on_update": "prime_shito.shito.events.on_order_update",
+	},
 }
+
+# Data retention
+# --------------
+# OTP records are transient; SMS-bearing order data is kept far longer because
+# it is the business's own sales history.
+
+default_log_clearing_doctypes = {
+	"Shito Phone Verification": 7,
+}
+
+# User Data Protection
+# --------------------
+# Lets Frappe's built-in personal-data deletion tooling reach the phone numbers
+# and addresses we hold, which is what Ghana's Data Protection Act expects.
+
+user_data_fields = [
+	{
+		"doctype": "Shito Order",
+		"filter_by": "phone",
+		"redact_fields": [
+			"phone",
+			"alt_phone",
+			"email",
+			"customer_name",
+			"delivery_address",
+			"landmark",
+			"ip_address",
+			"user_agent",
+		],
+		"partial": 1,
+	},
+	{
+		"doctype": "Shito Customer",
+		"filter_by": "phone",
+		"redact_fields": ["full_name", "alt_phone", "email", "default_address"],
+		"partial": 1,
+	},
+]

@@ -1,0 +1,502 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "PSO-.YYYY.-.#####",
+ "creation": "2026-07-30 09:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "order_tab",
+  "customer_name",
+  "phone",
+  "alt_phone",
+  "email",
+  "order_cb",
+  "tracking_code",
+  "workflow_state",
+  "shito_customer",
+  "phone_verified",
+  "items_section",
+  "items",
+  "totals_section",
+  "currency",
+  "items_total",
+  "delivery_fee",
+  "discount_amount",
+  "totals_cb",
+  "grand_total",
+  "amount_paid",
+  "amount_due",
+  "grand_total_pesewas",
+  "fulfilment_tab",
+  "fulfilment_type",
+  "delivery_zone",
+  "delivery_address",
+  "landmark",
+  "fulfilment_cb",
+  "preferred_delivery_date",
+  "delivery_notes",
+  "payment_tab",
+  "payment_method",
+  "payment_status",
+  "paid_at",
+  "payment_cb",
+  "payment_reference",
+  "payment_channel",
+  "expires_at",
+  "timeline_tab",
+  "confirmed_at",
+  "approved_at",
+  "dispatched_at",
+  "delivered_at",
+  "cancelled_at",
+  "cancellation_reason",
+  "timeline_cb",
+  "source",
+  "marketing_consent",
+  "ip_address",
+  "user_agent",
+  "erp_tab",
+  "sync_status",
+  "sales_order",
+  "payment_entry",
+  "erp_customer",
+  "erp_sync_cb",
+  "sync_error",
+  "sync_attempts",
+  "last_sync_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "order_tab",
+   "fieldtype": "Tab Break",
+   "label": "Order"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Phone",
+   "options": "Phone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "alt_phone",
+   "fieldtype": "Data",
+   "label": "Alternate Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "order_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The code the customer quotes. Unguessable by design.",
+   "fieldname": "tracking_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tracking Code",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Workflow State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shito_customer",
+   "fieldtype": "Link",
+   "label": "Customer Record",
+   "options": "Shito Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "phone_verified",
+   "fieldtype": "Check",
+   "label": "Phone Verified",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Shito Order Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "default": "GHS",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_total",
+   "fieldtype": "Currency",
+   "label": "Items Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_fee",
+   "fieldtype": "Currency",
+   "label": "Delivery Fee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totals_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount_paid",
+   "fieldtype": "Currency",
+   "label": "Amount Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount_due",
+   "fieldtype": "Currency",
+   "label": "Amount Due",
+   "read_only": 1
+  },
+  {
+   "description": "Integer minor units. The only value ever compared with a payment gateway.",
+   "fieldname": "grand_total_pesewas",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Grand Total (Pesewas)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fulfilment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Fulfilment"
+  },
+  {
+   "default": "Delivery",
+   "fieldname": "fulfilment_type",
+   "fieldtype": "Select",
+   "label": "Fulfilment Type",
+   "options": "Delivery\nPickup",
+   "reqd": 1
+  },
+  {
+   "fieldname": "delivery_zone",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Delivery Zone",
+   "options": "Shito Delivery Zone"
+  },
+  {
+   "fieldname": "delivery_address",
+   "fieldtype": "Small Text",
+   "label": "Delivery Address"
+  },
+  {
+   "fieldname": "landmark",
+   "fieldtype": "Data",
+   "label": "Landmark"
+  },
+  {
+   "fieldname": "fulfilment_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "preferred_delivery_date",
+   "fieldtype": "Date",
+   "label": "Preferred Delivery Date"
+  },
+  {
+   "fieldname": "delivery_notes",
+   "fieldtype": "Small Text",
+   "label": "Delivery Notes"
+  },
+  {
+   "fieldname": "payment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment"
+  },
+  {
+   "default": "Pay on Delivery",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Payment Method",
+   "options": "Pay on Delivery\nPay Online",
+   "reqd": 1
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Status",
+   "options": "Unpaid\nPending\nPaid\nPartially Paid\nFailed\nRefunded",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_at",
+   "fieldtype": "Datetime",
+   "label": "Paid At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Gateway reference. Unique, so the same payment can never be credited twice.",
+   "fieldname": "payment_reference",
+   "fieldtype": "Data",
+   "label": "Payment Reference",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "payment_channel",
+   "fieldtype": "Data",
+   "label": "Payment Channel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Unpaid Order Expires At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "timeline_tab",
+   "fieldtype": "Tab Break",
+   "label": "Timeline"
+  },
+  {
+   "fieldname": "confirmed_at",
+   "fieldtype": "Datetime",
+   "label": "Confirmed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approved_at",
+   "fieldtype": "Datetime",
+   "label": "Approved At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatched_at",
+   "fieldtype": "Datetime",
+   "label": "Dispatched At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_at",
+   "fieldtype": "Datetime",
+   "label": "Delivered At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled_at",
+   "fieldtype": "Datetime",
+   "label": "Cancelled At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason"
+  },
+  {
+   "fieldname": "timeline_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Website",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "Website\nWhatsApp\nPhone\nWalk-in"
+  },
+  {
+   "fieldname": "marketing_consent",
+   "fieldtype": "Check",
+   "label": "Marketing Consent Given",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_agent",
+   "fieldtype": "Small Text",
+   "label": "User Agent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "erp_tab",
+   "fieldtype": "Tab Break",
+   "label": "ERPNext"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Sync Status",
+   "options": "Pending\nSynced\nFailed\nSkipped",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "erp_customer",
+   "fieldtype": "Link",
+   "label": "ERPNext Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "erp_sync_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sync_error",
+   "fieldtype": "Small Text",
+   "label": "Sync Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sync_attempts",
+   "fieldtype": "Int",
+   "label": "Sync Attempts",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_sync_at",
+   "fieldtype": "Datetime",
+   "label": "Last Sync At",
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-shopping-cart",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-07-30 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Prime Shito",
+ "name": "Shito Order",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Sales",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Shito Dispatch",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "tracking_code,phone,customer_name",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer_name",
+ "track_changes": 1
+}

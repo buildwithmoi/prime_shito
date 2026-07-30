@@ -77,6 +77,35 @@
 			</div>
 		</section>
 
+		<!-- Order tracking: a headline feature, so it sits on the front page
+		     rather than behind a nav link. -->
+		<section class="border-y border-cream-200 bg-char-900">
+			<div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<h2 class="text-xl font-bold text-white">Already ordered?</h2>
+					<p class="mt-1 text-sm text-cream-200">
+						Track it with the code we texted you.
+					</p>
+				</div>
+				<form class="flex gap-2" @submit.prevent="goToTrack">
+					<input
+						v-model="trackCode"
+						type="text"
+						autocapitalize="characters"
+						class="h-12 w-full min-w-0 rounded-xl border-0 px-3 font-mono uppercase tracking-wider text-char-900 focus:outline-none focus:ring-2 focus:ring-chili-500 sm:w-52"
+						placeholder="PS-XXXX-XXXX"
+						aria-label="Tracking code"
+					/>
+					<button
+						type="submit"
+						class="h-12 shrink-0 rounded-xl bg-chili-600 px-5 font-semibold text-white transition hover:bg-chili-700"
+					>
+						Track
+					</button>
+				</form>
+			</div>
+		</section>
+
 		<!-- How it works -->
 		<section class="border-y border-cream-200 bg-white">
 			<div class="mx-auto max-w-6xl px-4 py-12">
@@ -123,6 +152,7 @@ export default defineComponent({
 		return {
 			store,
 			sf,
+			trackCode: '',
 			steps: [
 				{
 					title: 'Choose your packs',
@@ -155,6 +185,10 @@ export default defineComponent({
 	methods: {
 		retry() {
 			loadStorefront(true);
+		},
+		goToTrack() {
+			const code = this.trackCode.trim().toUpperCase();
+			this.$router.push(code ? `/track/${code}` : '/track');
 		}
 	}
 });

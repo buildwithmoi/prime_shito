@@ -13,7 +13,117 @@ MODES_OF_PAYMENT = ("Mobile Money", "Pay on Delivery")
 def after_install():
 	create_roles()
 	create_modes_of_payment()
+	create_workflow()
 	frappe.db.commit()
+
+
+# Mirrors prime_shito.shito.state.ALLOWED. A test asserts the two agree, because
+# a workflow that permits a jump the state machine rejects (or vice versa) would
+# only surface as a confusing error in production.
+WORKFLOW_NAME = "Shito Order Workflow"
+
+# ORDER MATTERS: Frappe treats states[0] as the state new documents start in,
+# and refuses on insert to set any other one -- that check ignores roles, so
+# there is no way around it. "Awaiting Approval" must stay first.
+WORKFLOW_STATES = (
+	# (state, style, role allowed to edit while in this state)
+	("Awaiting Approval", "Warning", "Shito Sales"),
+	("Approved", "Primary", "Shito Sales"),
+	("Out for Delivery", "Info", "Shito Dispatch"),
+	("Completed", "Success", "Shito Manager"),
+	("Cancelled", "Danger", "Shito Manager"),
+	# Reserved for the online-payment flow, which is not wired up yet. They
+	# have no incoming transitions on purpose: adding buttons for a flow that
+	# cannot happen would only confuse whoever is working the order list.
+	("Pending Payment", "Warning", "Shito Manager"),
+	("Expired", "Danger", "Shito Manager"),
+)
+
+WORKFLOW_ACTIONS = ("Approve", "Dispatch", "Complete", "Cancel", "Reopen")
+
+WORKFLOW_TRANSITIONS = (
+	# (from, action, to, allowed role)
+	("Awaiting Approval", "Approve", "Approved", "Shito Sales"),
+	("Awaiting Approval", "Cancel", "Cancelled", "Shito Manager"),
+	("Approved", "Dispatch", "Out for Delivery", "Shito Dispatch"),
+	("Approved", "Cancel", "Cancelled", "Shito Manager"),
+	("Out for Delivery", "Complete", "Completed", "Shito Dispatch"),
+	("Out for Delivery", "Cancel", "Cancelled", "Shito Manager"),
+	("Expired", "Reopen", "Awaiting Approval", "Shito Manager"),
+)
+
+
+def create_workflow():
+	"""Create the order workflow, giving Desk its action buttons for free."""
+	if not frappe.db.exists("DocType", "Shito Order"):
+		return
+
+	for state_name, style, _role in WORKFLOW_STATES:
+		if not frappe.db.exists("Workflow State", state_name):
+			frappe.get_doc(
+				{"doctype": "Workflow State", "workflow_state_name": state_name, "style": style}
+			).insert(ignore_permissions=True)
+
+	for action in WORKFLOW_ACTIONS:
+		if not frappe.db.exists("Workflow Action Master", action):
+			frappe.get_doc({"doctype": "Workflow Action Master", "workflow_action_name": action}).insert(
+				ignore_permissions=True
+			)
+
+	# Rebuilt rather than skipped when it already exists, so edits to the tables
+	# above actually reach an installed site on the next migrate.
+	if frappe.db.exists("Workflow", WORKFLOW_NAME):
+		existing = frappe.get_doc("Workflow", WORKFLOW_NAME)
+		existing.set("states", [])
+		existing.set("transitions", [])
+		for state_name, _style, role in WORKFLOW_STATES:
+			existing.append("states", {"state": state_name, "doc_status": "0", "allow_edit": role})
+		for from_state, action, to_state, role in WORKFLOW_TRANSITIONS:
+			existing.append(
+				"transitions",
+				{
+					"state": from_state,
+					"action": action,
+					"next_state": to_state,
+					"allowed": role,
+					"allow_self_approval": 1,
+				},
+			)
+		existing.is_active = 1
+		existing.save(ignore_permissions=True)
+		return
+
+	workflow = frappe.get_doc(
+		{
+			"doctype": "Workflow",
+			"workflow_name": WORKFLOW_NAME,
+			"document_type": "Shito Order",
+			"workflow_state_field": "workflow_state",
+			"is_active": 1,
+			# Shito Order is not submittable, so every state is doc_status 0.
+			# The submittable accounting artefact is the downstream ERPNext
+			# Sales Order, not this document.
+			"states": [
+				{
+					"state": state_name,
+					"doc_status": "0",
+					"allow_edit": role,
+				}
+				for state_name, _style, role in WORKFLOW_STATES
+			],
+			"transitions": [
+				{
+					"state": from_state,
+					"action": action,
+					"next_state": to_state,
+					"allowed": role,
+					"allow_self_approval": 1,
+				}
+				for from_state, action, to_state, role in WORKFLOW_TRANSITIONS
+			],
+		}
+	)
+	workflow.insert(ignore_permissions=True)
 
 
 def create_roles():
