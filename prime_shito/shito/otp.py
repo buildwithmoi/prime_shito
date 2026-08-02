@@ -163,7 +163,12 @@ def _send_otp(settings, phone: str, otp: str, ttl: int) -> bool:
 		{"otp": otp, "mins": max(ttl // 60, 1)},
 	)
 
-	return notify.send_sms(phone, message, template_key="otp")
+	return notify.send_sms(
+		phone,
+		message,
+		template_key="tpl_otp",
+		reference_doctype="Shito Phone Verification",
+	)
 
 
 def verify_otp(raw_phone: str, otp: str, ip_address: str | None = None) -> dict:

@@ -309,6 +309,7 @@ doc_events = {
 
 default_log_clearing_doctypes = {
 	"Shito Phone Verification": 7,
+	"Shito SMS Message": 180,
 }
 
 # User Data Protection

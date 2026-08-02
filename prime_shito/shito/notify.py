@@ -1,20 +1,22 @@
 """Transactional SMS.
 
 Sends through Frappe's built-in SMS Settings gateway (Core > SMS Settings),
-pointed at Arkesel. No custom gateway hook: configuring SMS Settings is enough.
+pointed at Arkesel. No custom gateway hook is needed: configuring SMS Settings
+is enough, and the Notification doctype routes through the same path.
 
 Note for later: the built-in sender issues one HTTP request per recipient. That
 is right for order notifications, which go to one person, but advertisement
 campaigns will want Arkesel's bulk endpoint instead.
 
 Every message is rendered from a Jinja template on Prime Shito Settings, so the
-owner can reword any of them without a deploy. Templates are validated as GSM-7
-on save -- see shito/gsm.py for why that matters to the bill.
+owner can reword any of them without a deploy, and every send is logged to
+Shito SMS Message with its segment count -- see shito/gsm.py for why segments
+are the thing that actually drives the bill.
 """
 
 import frappe
 from frappe import _
-from frappe.utils import cint, get_url
+from frappe.utils import cint, flt, get_url, now_datetime
 
 from prime_shito.shito import gsm
 from prime_shito.shito import phone as phone_utils
@@ -39,60 +41,123 @@ def render(template: str, context: dict) -> str:
 		return template
 
 
-def send_sms(to_phone: str, message: str, *, template_key: str = "", reference: str | None = None) -> bool:
-	"""Send one SMS. Returns True if handed to the gateway.
+def log_message(
+	*,
+	to_phone: str,
+	message: str,
+	status: str,
+	template_key: str = "",
+	reference_doctype: str | None = None,
+	reference_name: str | None = None,
+	error: str | None = None,
+) -> str:
+	"""Record one outbound SMS. Returns the log name."""
+	settings = _settings()
+	encoding, segments = gsm.count_segments(message)
+
+	doc = frappe.get_doc(
+		{
+			"doctype": "Shito SMS Message",
+			"to_phone": to_phone,
+			"message": message,
+			"encoding": encoding,
+			"segments": segments,
+			"cost": flt(segments) * flt(settings.sms_cost_per_segment),
+			"status": status,
+			"template_key": template_key,
+			"reference_doctype": reference_doctype,
+			"reference_name": reference_name,
+			"error": error,
+			"sent_at": now_datetime() if status in ("Sent", "Sandbox") else None,
+		}
+	).insert(ignore_permissions=True)
+
+	return doc.name
+
+
+def send_sms(
+	to_phone: str,
+	message: str,
+	*,
+	template_key: str = "",
+	reference_doctype: str | None = None,
+	reference_name: str | None = None,
+) -> bool:
+	"""Send one SMS and log it. Returns True if handed to the gateway.
 
 	Never raises: a failed notification must not roll back or block the order
 	it is describing.
 	"""
 	settings = _settings()
 
-	if not cint(settings.sms_enabled):
-		return False
-
 	if not message:
 		return False
 
-	to_phone = phone_utils.normalize(to_phone, throw=False)
-	if not to_phone:
+	normalized = phone_utils.normalize(to_phone, throw=False)
+	if not normalized:
 		return False
 
-	if is_suppressed(to_phone):
+	log = {
+		"to_phone": normalized,
+		"message": message,
+		"template_key": template_key,
+		"reference_doctype": reference_doctype,
+		"reference_name": reference_name,
+	}
+
+	if not cint(settings.sms_enabled):
 		return False
 
-	encoding, segments = gsm.count_segments(message)
+	if is_suppressed(normalized):
+		log_message(status="Suppressed", **log)
+		return False
 
 	if cint(settings.sms_sandbox):
-		# Log what would have been sent, and bill nothing.
-		frappe.logger("prime_shito").info(
-			f"[sms-sandbox] to={phone_utils.mask(to_phone)} "
-			f"key={template_key} enc={encoding} segments={segments} msg={message!r}"
-		)
+		# Logged with a full segment count so the owner can see what a real
+		# run would have cost, but nothing is sent and nothing is billed.
+		log_message(status="Sandbox", **log)
 		return True
+
+	if _over_daily_cap(settings):
+		log_message(status="Failed", error="Daily SMS cap reached", **log)
+		frappe.log_error(title="Prime Shito: daily SMS cap reached")
+		return False
 
 	try:
 		from frappe.core.doctype.sms_settings.sms_settings import send_sms as frappe_send_sms
 
 		frappe_send_sms(
-			receiver_list=[phone_utils.to_local_international(to_phone)],
+			receiver_list=[phone_utils.to_local_international(normalized)],
 			msg=message,
 			sender_name=settings.arkesel_sender_id or "",
 			success_msg=False,
 		)
+		log_message(status="Sent", **log)
 		return True
-	except Exception:
+	except Exception as exc:
+		log_message(status="Failed", error=str(exc)[:500], **log)
 		frappe.log_error(
 			title="Prime Shito: SMS send failed",
-			message=f"to={phone_utils.mask(to_phone)} key={template_key} reference={reference}",
+			message=f"to={phone_utils.mask(normalized)} key={template_key}",
 		)
 		return False
 
 
+def _over_daily_cap(settings) -> bool:
+	cap = cint(settings.sms_daily_cap)
+	if cap <= 0:
+		return False
+
+	sent_today = frappe.db.count(
+		"Shito SMS Message",
+		{"status": ("in", ["Sent", "Delivered"]), "creation": (">=", frappe.utils.today())},
+	)
+	return sent_today >= cap
+
+
 def is_suppressed(phone: str) -> bool:
 	"""Numbers that must never be texted again."""
-	if frappe.db.exists("Shito Customer", {"name": phone, "is_blocked": 1}):
-		return True
-	return False
+	return bool(frappe.db.get_value("Shito Customer", phone, "is_blocked"))
 
 
 # --------------------------------------------------------------------------
@@ -111,6 +176,12 @@ TEMPLATE_FOR_STATE = {
 
 
 def order_context(order) -> dict:
+	"""Values available to every order SMS template.
+
+	Money is formatted without a currency symbol -- templates write "GHS {{ total }}"
+	-- because the cedi sign is outside GSM-7 and would double the cost of the
+	message carrying it.
+	"""
 	settings = _settings()
 	return {
 		"code": order.tracking_code,
@@ -132,12 +203,30 @@ def order_context(order) -> dict:
 	}
 
 
+def already_sent(order_name: str, template_key: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Shito SMS Message",
+			{
+				"reference_doctype": "Shito Order",
+				"reference_name": order_name,
+				"template_key": template_key,
+				"status": ("in", ["Queued", "Sent", "Delivered", "Sandbox"]),
+			},
+		)
+	)
+
+
 def notify_order(order_name: str, template_key: str) -> bool:
 	"""Send one order notification, at most once per (order, template).
 
-	Idempotent so a retried background job or a double save cannot text the
-	customer twice about the same thing.
+	Idempotent so a retried background job, a double save, or an order that
+	moves back into a state it already visited cannot text the customer twice
+	about the same thing.
 	"""
+	if already_sent(order_name, template_key):
+		return False
+
 	order = frappe.get_doc("Shito Order", order_name)
 	settings = _settings()
 
@@ -149,17 +238,13 @@ def notify_order(order_name: str, template_key: str) -> bool:
 	if not message:
 		return False
 
-	sent = send_sms(
+	return send_sms(
 		order.phone,
 		message,
 		template_key=template_key,
-		reference=order.name,
+		reference_doctype="Shito Order",
+		reference_name=order.name,
 	)
-
-	if sent:
-		order.add_comment("Info", _("SMS sent: {0}").format(template_key))
-
-	return sent
 
 
 def enqueue_order_sms(order, template_key: str) -> None:
@@ -180,5 +265,112 @@ def enqueue_order_sms(order, template_key: str) -> None:
 
 
 def notify_state_change(order, new_state: str) -> None:
-	template_key = TEMPLATE_FOR_STATE.get(new_state, "tpl_status_update")
-	enqueue_order_sms(order, template_key)
+	enqueue_order_sms(order, TEMPLATE_FOR_STATE.get(new_state, "tpl_status_update"))
+
+
+@frappe.whitelist()
+def send_test_sms(phone: str) -> dict:
+	"""Send one real message to the owner, to prove the gateway is configured.
+
+	The single most common SMS failure is an unapproved Arkesel sender ID,
+	which is often rejected silently. Sending a test to your own phone is the
+	only reliable way to find out before customers are affected.
+	"""
+	frappe.only_for(("Shito Manager", "System Manager"))
+
+	settings = _settings()
+
+	if not cint(settings.sms_enabled):
+		return {"sent": False, "detail": _("Enable SMS first.")}
+
+	message = f"Prime Shito test message. Sender ID: {settings.arkesel_sender_id or 'default'}."
+	sent = send_sms(phone, message, template_key="test")
+
+	if cint(settings.sms_sandbox):
+		return {
+			"sent": False,
+			"detail": _(
+				"Sandbox mode is on, so this was logged but not delivered. "
+				"Turn off Sandbox Mode to send for real."
+			),
+		}
+
+	if not sent:
+		return {
+			"sent": False,
+			"detail": _("Sending failed. Check the Shito SMS Message log and the Error Log."),
+		}
+
+	return {
+		"sent": True,
+		"detail": _(
+			"Handed to the gateway. If nothing arrives, the usual cause is a sender ID "
+			"that Arkesel has not approved."
+		),
+	}
+
+
+@frappe.whitelist()
+def preview_templates() -> list[dict]:
+	"""Show the owner what each template will send, and what it will cost.
+
+	Rendered against the most recent real order so the preview reflects actual
+	names and amounts rather than placeholder text.
+	"""
+	frappe.only_for(("Shito Manager", "System Manager"))
+
+	settings = _settings()
+	recent = frappe.get_all("Shito Order", fields=["name"], order_by="creation desc", limit=1)
+
+	if recent:
+		context = order_context(frappe.get_doc("Shito Order", recent[0].name))
+	else:
+		context = {
+			"code": "PS-7K2M-9XQD",
+			"name": "Ama",
+			"n": 2,
+			"total": "175.00",
+			"paid": "0.00",
+			"due": "175.00",
+			"status": "Approved",
+			"payment_status": "Unpaid",
+			"pay_state": "pay on delivery",
+			"zone": "Accra Central",
+			"reason": "",
+			"support": settings.support_phone or "",
+			"site": get_url(),
+			"url": get_url("/track/PS-7K2M-9XQD"),
+			"pay_url": get_url("/track/PS-7K2M-9XQD"),
+			"mins": 60,
+		}
+
+	context["otp"] = "123456"
+
+	rows = []
+	for df in settings.meta.fields:
+		if not df.fieldname.startswith("tpl_"):
+			continue
+
+		body = render(settings.get(df.fieldname), context)
+		encoding, segments = gsm.count_segments(body)
+
+		rows.append(
+			{
+				"template": df.fieldname,
+				"label": _(df.label),
+				"message": body,
+				"characters": len(body),
+				"encoding": encoding,
+				"segments": segments,
+				"cost": flt(segments) * flt(settings.sms_cost_per_segment),
+				"warning": (
+					_("Contains characters that force expensive UCS-2 encoding: {0}").format(
+						" ".join(gsm.non_gsm7_characters(body))
+					)
+					if encoding == "UCS-2"
+					else None
+				),
+			}
+		)
+
+	return rows
