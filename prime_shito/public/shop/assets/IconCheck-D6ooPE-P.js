@@ -1,1 +1,0 @@
-import{s as e,t,u as n,x as r}from"./_plugin-vue_export-helper-Dggr2-LE.js";var i={},a={viewBox:`0 0 24 24`,fill:`none`,class:`stroke-icon`,stroke:`currentColor`,"stroke-linecap":`round`,"stroke-linejoin":`round`,"aria-hidden":`true`};function o(t,i){return r(),n(`svg`,a,[...i[0]||(i[0]=[e(`path`,{d:`m4.5 12.5 5 5 10-11`},null,-1)])])}var s=t(i,[[`render`,o]]);export{s as t};

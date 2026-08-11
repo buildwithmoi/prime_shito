@@ -8,7 +8,8 @@
     "build": "vite build --base=/assets/prime_shito/shop/ && yarn copy-html-entry",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
-    "copy-html-entry": "cp ../prime_shito/public/shop/index.html ../prime_shito/www/shop.html"
+    "copy-html-entry": "cp ../prime_shito/public/shop/index.html ../prime_shito/www/shop.html",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "socket.io-client": "^4.5.1",
@@ -20,6 +21,7 @@
     "@types/node": "^24.13.2",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",

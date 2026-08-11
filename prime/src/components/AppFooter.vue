@@ -13,11 +13,14 @@
 					     with its own SMS integration that a customer could only get to
 					     by typing the URL. Contact was in the header but not here; the
 					     two menus should not disagree about what the site contains. -->
-					<ul class="mt-3 space-y-2 text-sm">
+					<!-- inline-flex + min-h-9 gives each row a thumb-sized hit area
+					     without the visual gaps a list of five links would get from
+					     padding alone. -->
+					<ul class="mt-2 text-sm">
 						<li v-for="link in shopLinks" :key="link.to">
 							<router-link
 								:to="link.to"
-								class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700"
+								class="inline-flex min-h-9 items-center text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700"
 							>
 								{{ link.label }}
 							</router-link>
@@ -27,19 +30,19 @@
 
 				<div>
 					<h3 class="text-sm font-semibold text-char-900">Talk to us</h3>
-					<ul class="mt-3 space-y-2 text-sm">
+					<ul class="mt-2 text-sm">
 						<li v-if="store.support_phone">
-							<a :href="`tel:${store.support_phone}`" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
+							<a :href="`tel:${store.support_phone}`" class="inline-flex min-h-9 items-center text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
 								{{ store.support_phone }}
 							</a>
 						</li>
 						<li v-if="store.whatsapp_number">
-							<a :href="whatsappUrl" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700" rel="noopener">
+							<a :href="whatsappUrl" class="inline-flex min-h-9 items-center text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700" rel="noopener">
 								WhatsApp
 							</a>
 						</li>
 						<li v-if="store.support_email">
-							<a :href="`mailto:${store.support_email}`" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
+							<a :href="`mailto:${store.support_email}`" class="inline-flex min-h-9 items-center text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
 								{{ store.support_email }}
 							</a>
 						</li>

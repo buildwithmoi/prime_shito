@@ -29,14 +29,18 @@ bench --site local.16.2 execute prime_shito.install.create_demo_data
 bench --site local.16.2 run-tests --module prime_shito.prime_shito.doctype.shito_pack.test_shito_pack
 
 # app root
-cd prime && yarn build      # -> prime_shito/public/shop/ + prime_shito/www/shop.html
-cd prime && yarn dev        # vite on :8080, proxied to the bench
-cd prime && yarn type-check # vue-tsc; catches real bugs, run before committing
+cd prime && yarn build       # -> prime_shito/public/shop/ + prime_shito/www/shop.html
+cd prime && yarn dev         # vite on :8080, proxied to the bench
+cd prime && yarn type-check  # vue-tsc; catches real bugs, run before committing
+cd prime && yarn screenshots # Playwright, 3 viewports; see Screenshots below
 
 # lint (matches CI's pre-commit)
 /home/patoo/fb-16-2/env/bin/python -m ruff check prime_shito/
 /home/patoo/fb-16-2/env/bin/python -m ruff format prime_shito/
 ```
+
+**`yarn build` needs Node 20+** (Vite 8's bundler imports `node:util`'s `styleText`). If the shell
+defaults to Node 18 it dies with an unhelpful `SyntaxError`; run `nvm use 24` first.
 
 **`bench build` is not needed for the SPA.** `sites/assets/prime_shito` is already a symlink to
 `prime_shito/public/`, so `yarn build` output is served immediately. Only run it if you add
@@ -190,7 +194,31 @@ this, which is why `yarn type-check` is worth running.
 
 Mobile-first is a requirement, not polish: most customers are on phones with metered data. System
 fonts only, route-level code splitting, `build.target: es2020`. Budget is **<150 KB gzipped JS** for
-first paint (currently ~43 KB).
+first paint (currently ~47 KB).
+
+Everything the app varies is a token in `src/style.css` — colour, icon size, icon stroke, three
+durations, one easing curve. Pick from that list rather than inventing a number. Icons are inline
+SVGs in `src/components/icons/`; **never an emoji**, which renders as whatever the customer's phone
+vendor drew and cannot take `currentColor`. `StateBlock`'s `emptyIcon` prop is typed as a Component
+specifically so `yarn type-check` rejects a string.
+
+Naming a `@utility` after a Tailwind namespace silently breaks it. `@utility stroke-icon` compiled to
+`stroke: var(--stroke-icon)` — Tailwind owns `stroke-*` for stroke *colours* — which set the colour
+to `1.8`, resolved to `stroke: none`, and rendered every icon blank. It is `icon-stroke` now.
+
+### Screenshots
+
+```bash
+cd prime && yarn build && yarn screenshots
+```
+
+Drives the built bundle in Playwright at 375 / 768 / 1440 with the API stubbed from fixtures, so it
+needs no running bench and gives identical output every run. Writes to `prime/screenshots/`
+(gitignored) and fails loudly on console errors, horizontal overflow, text clipped inside an
+`overflow-hidden` ancestor, and sub-32px tap targets.
+
+The clipping check exists because a card with `overflow-hidden` silently cut a cart price to
+"GHS 90.0" while the page still measured clean — document-level overflow cannot see that.
 
 ## Testing
 

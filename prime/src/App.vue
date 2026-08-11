@@ -21,7 +21,19 @@
 		</main>
 
 		<AppFooter />
-		<WhatsAppFab :packs="packs" />
+		<!--
+			Hidden during checkout: the button floats bottom-right, which is exactly
+			where the submit button sits, so it covered "Continue to payment". A
+			customer mid-checkout is already converting; offering them a different
+			channel there is a distraction on top of a collision.
+
+			Raised on PackDetail, the only other view with a sticky action bar.
+		-->
+		<WhatsAppFab
+			v-if="$route.name !== 'Checkout'"
+			:packs="packs"
+			:raised="$route.name === 'PackDetail'"
+		/>
 	</div>
 </template>
 

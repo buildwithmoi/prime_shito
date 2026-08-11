@@ -39,13 +39,28 @@
 
 				<div class="order-first md:order-last">
 					<img
-						:src="heroImage"
-						alt="A jar of Prime Shito"
+						v-if="store.hero_image"
+						:src="store.hero_image"
+						:alt="store.business_name"
 						class="aspect-[4/3] w-full rounded-3xl object-cover shadow-xl shadow-chili-600/10"
 						width="640"
 						height="480"
 						fetchpriority="high"
 					/>
+					<!--
+						No hero photo set. This used to fall back to the Vite starter's
+						abstract placeholder, which had nothing to do with shito and read as
+						an unfinished site. A branded panel is honest about being a
+						placeholder; upload a real photo in Prime Shito Settings.
+					-->
+					<div
+						v-else
+						class="flex aspect-[4/3] w-full items-center justify-center rounded-3xl bg-gradient-to-br from-chili-600 to-chili-800 p-8 shadow-xl shadow-chili-600/10"
+					>
+						<span class="text-center text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+							{{ store.business_name }}
+						</span>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -57,7 +72,7 @@
 					<h2 class="text-2xl font-bold tracking-tight text-char-900">Our packs</h2>
 					<p class="mt-1 text-sm text-char-500">Pre-order and we make yours in the next batch.</p>
 				</div>
-				<router-link to="/packs" class="shrink-0 text-sm font-semibold text-chili-700 transition-colors duration-(--duration-fast) hover:underline">
+				<router-link to="/packs" class="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-chili-700 transition-colors duration-(--duration-fast) hover:underline">
 					See all
 				</router-link>
 			</div>
@@ -141,7 +156,6 @@ import PackCard from '../components/PackCard.vue';
 import StateBlock from '../components/StateBlock.vue';
 import { store } from '../lib/boot';
 import { state as sf, loadStorefront } from '../lib/storefront';
-import heroFallback from '../assets/hero.png';
 import type { Pack } from '../lib/types';
 
 export default defineComponent({
@@ -170,9 +184,6 @@ export default defineComponent({
 		};
 	},
 	computed: {
-		heroImage(): string {
-			return store.hero_image || heroFallback;
-		},
 		featured(): Pack[] {
 			const starred = sf.packs.filter((p) => p.is_featured);
 			return (starred.length ? starred : sf.packs).slice(0, 3);

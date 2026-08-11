@@ -11,7 +11,8 @@
 		:href="url"
 		target="_blank"
 		rel="noopener"
-		class="fixed bottom-5 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] shadow-lg shadow-black/20 transition-transform duration-(--duration-fast) ease-(--ease-out-soft) hover:scale-105 print:hidden"
+		class="fixed right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] shadow-lg shadow-black/20 transition-transform duration-(--duration-fast) ease-(--ease-out-soft) hover:scale-105 print:hidden"
+		:class="raised ? 'bottom-24 sm:bottom-5' : 'bottom-5'"
 		aria-label="Order on WhatsApp"
 	>
 		<svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 text-white" aria-hidden="true">
@@ -36,7 +37,11 @@ export default defineComponent({
 	props: {
 		// Passed in where the catalog is already loaded, so the message can name
 		// the packs rather than their codes.
-		packs: { type: Array as () => Pack[], default: () => [] }
+		packs: { type: Array as () => Pack[], default: () => [] },
+		// Lifts the button clear of a sticky action bar. Without this it sits on
+		// top of the Add to cart button's price on the pack page -- the one tap
+		// the whole page exists to get.
+		raised: { type: Boolean, default: false }
 	},
 	data() {
 		return { store };

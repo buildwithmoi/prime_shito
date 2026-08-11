@@ -2,7 +2,7 @@
 	<svg
 		viewBox="0 0 24 24"
 		fill="none"
-		class="stroke-icon"
+		class="icon-stroke"
 		stroke="currentColor"
 		stroke-linecap="round"
 		stroke-linejoin="round"

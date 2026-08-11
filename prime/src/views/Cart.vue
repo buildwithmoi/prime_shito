@@ -36,9 +36,12 @@
 					<div class="min-w-0 flex-1">
 						<div class="flex items-start justify-between gap-3">
 							<h2 class="font-semibold leading-tight text-char-900">{{ line.pack_name }}</h2>
+							<!-- Negative margin keeps the label visually where it was while
+							     giving the control a 44px hit area. Removing a line is
+							     destructive; it should not need a precise tap. -->
 							<button
 								type="button"
-								class="shrink-0 text-sm text-char-400 transition-colors duration-(--duration-fast) hover:text-chili-700"
+								class="-my-2 -mr-2 flex min-h-11 shrink-0 items-center px-2 text-sm text-char-400 transition-colors duration-(--duration-fast) hover:text-chili-700"
 								:aria-label="`Remove ${line.pack_name}`"
 								@click="remove(line.pack)"
 							>
@@ -48,7 +51,14 @@
 
 						<p class="mt-0.5 text-sm text-char-400">{{ money(line.rate) }} each</p>
 
-						<div class="mt-3 flex items-center justify-between gap-3">
+						<!--
+							flex-wrap, not nowrap alone: at 375px the 136px stepper and the
+							amount cannot share a 215px row, so the amount either broke
+							mid-figure ("GHS" / "90.00") or got clipped by the card's
+							overflow-hidden. Wrapping drops it to its own right-aligned line
+							on the narrowest phones and keeps it inline everywhere else.
+						-->
+						<div class="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
 							<QtyStepper
 								:model-value="line.qty"
 								:min="1"
@@ -56,7 +66,9 @@
 								:label="line.pack_name"
 								@update:model-value="(q: number) => setQty(line.pack, q)"
 							/>
-							<span class="font-semibold text-char-900">{{ money(line.amount) }}</span>
+							<span class="ml-auto font-semibold whitespace-nowrap text-char-900">
+								{{ money(line.amount) }}
+							</span>
 						</div>
 					</div>
 				</li>

@@ -122,8 +122,13 @@ body {
  * token is the single source of truth -- a token nothing reads is just a
  * comment, and the point of naming these was to stop the next change inventing
  * its own number.
+ *
+ * Named `icon-stroke`, NOT `stroke-icon`: Tailwind owns the `stroke-*`
+ * namespace for stroke colours, so the latter compiled to
+ * `stroke: var(--stroke-icon)` -- setting the colour to 1.8, which is invalid,
+ * so it resolved to `stroke: none` and every stroked icon rendered blank.
  */
-@utility stroke-icon {
+@utility icon-stroke {
 	stroke-width: var(--stroke-icon);
 }
 

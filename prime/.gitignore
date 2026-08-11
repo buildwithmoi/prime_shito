@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright output from `yarn screenshots` — regenerate, do not commit.
+screenshots/

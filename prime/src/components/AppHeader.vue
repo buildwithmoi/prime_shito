@@ -1,7 +1,7 @@
 <template>
 	<header class="sticky top-0 z-40 border-b border-cream-200 bg-cream-50/95 backdrop-blur">
 		<div class="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
-			<router-link to="/" class="flex min-w-0 items-center gap-2">
+			<router-link to="/" class="flex min-h-11 min-w-0 items-center gap-2">
 				<img
 					v-if="store.logo"
 					:src="store.logo"
@@ -59,14 +59,17 @@
 			shut.
 		-->
 		<nav
-			class="scrollbar-none -mt-px flex gap-1 overflow-x-auto border-t border-cream-200 px-4 py-2 sm:hidden"
+			class="scrollbar-none -mt-px flex gap-1 overflow-x-auto border-t border-cream-200 px-4 sm:hidden"
 			aria-label="Main"
 		>
+			<!-- min-h-11 (44px) rather than vertical padding: these are the primary
+			     navigation controls on a phone and were 32px tall, below the size a
+			     thumb hits reliably. -->
 			<router-link
 				v-for="link in mobileLinks"
 				:key="link.to"
 				:to="link.to"
-				class="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-char-700 transition-colors duration-(--duration-fast)"
+				class="flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-char-700 transition-colors duration-(--duration-fast)"
 				active-class="bg-chili-50 text-chili-700"
 			>
 				{{ link.label }}
