@@ -37,7 +37,7 @@
 
 			<button
 				type="submit"
-				class="h-12 w-full rounded-xl bg-chili-600 font-semibold text-white transition hover:bg-chili-700 disabled:cursor-not-allowed disabled:bg-char-400"
+				class="btn-primary h-12 w-full"
 				:disabled="busy"
 			>
 				{{ busy ? 'Looking…' : 'Find my order' }}
@@ -77,10 +77,11 @@
 				<ol class="mt-4 space-y-4">
 					<li v-for="step in order.timeline" :key="step.label" class="flex gap-3">
 						<span
-							class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs"
-							:class="step.done ? 'bg-chili-600 text-white' : 'bg-cream-200 text-char-400'"
+							class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full"
+							:class="step.done ? 'bg-chili-600 text-white' : 'bg-cream-200'"
 						>
-							{{ step.done ? '✓' : '·' }}
+							<IconCheck v-if="step.done" class="size-(--size-icon-sm)" />
+							<span v-else class="h-1.5 w-1.5 rounded-full bg-char-400" aria-hidden="true" />
 						</span>
 						<span>
 							<span class="block text-sm font-medium" :class="step.done ? 'text-char-900' : 'text-char-400'">
@@ -98,8 +99,7 @@
 				<ul class="mt-4 space-y-3">
 					<li v-for="(item, i) in order.items" :key="i" class="flex items-center gap-3">
 						<div class="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream-100">
-							<img v-if="item.image" :src="item.image" alt="" class="h-full w-full object-cover" loading="lazy" />
-							<div v-else class="grid h-full w-full place-items-center" aria-hidden="true">🌶️</div>
+							<PackImage :src="item.image" :alt="item.pack_name" />
 						</div>
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium text-char-900">{{ item.pack_name }}</p>
@@ -150,7 +150,7 @@
 
 			<p class="text-center text-xs text-char-400">
 				Something wrong?
-				<a v-if="store.whatsapp_number" :href="whatsappUrl" class="font-medium text-chili-700 hover:underline">
+				<a v-if="store.whatsapp_number" :href="whatsappUrl" class="font-medium text-chili-700 transition-colors duration-(--duration-fast) hover:underline">
 					Message us on WhatsApp
 				</a>
 				<span v-else-if="store.support_phone">Call {{ store.support_phone }}</span>
@@ -162,6 +162,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import PackImage from '../components/PackImage.vue';
+import IconCheck from '../components/icons/IconCheck.vue';
 import call, { FrappeError } from '../lib/call';
 import { money } from '../lib/money';
 import { store } from '../lib/boot';
@@ -178,6 +180,7 @@ const STATUS_CLASSES: Record<string, string> = {
 
 export default defineComponent({
 	name: 'TrackView',
+	components: { PackImage, IconCheck },
 	props: {
 		// Filled from /track/:code so an SMS link prefills the code. The phone
 		// digits are still required: the link alone must not reveal an address.

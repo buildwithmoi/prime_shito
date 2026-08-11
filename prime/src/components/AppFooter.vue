@@ -9,10 +9,19 @@
 
 				<div>
 					<h3 class="text-sm font-semibold text-char-900">Shop</h3>
+					<!-- Track order was previously reachable from nowhere: a real route
+					     with its own SMS integration that a customer could only get to
+					     by typing the URL. Contact was in the header but not here; the
+					     two menus should not disagree about what the site contains. -->
 					<ul class="mt-3 space-y-2 text-sm">
-						<li><router-link to="/packs" class="text-char-500 hover:text-chili-700">All packs</router-link></li>
-						<li><router-link to="/cart" class="text-char-500 hover:text-chili-700">Your cart</router-link></li>
-						<li><router-link to="/about" class="text-char-500 hover:text-chili-700">About us</router-link></li>
+						<li v-for="link in shopLinks" :key="link.to">
+							<router-link
+								:to="link.to"
+								class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700"
+							>
+								{{ link.label }}
+							</router-link>
+						</li>
 					</ul>
 				</div>
 
@@ -20,17 +29,17 @@
 					<h3 class="text-sm font-semibold text-char-900">Talk to us</h3>
 					<ul class="mt-3 space-y-2 text-sm">
 						<li v-if="store.support_phone">
-							<a :href="`tel:${store.support_phone}`" class="text-char-500 hover:text-chili-700">
+							<a :href="`tel:${store.support_phone}`" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
 								{{ store.support_phone }}
 							</a>
 						</li>
 						<li v-if="store.whatsapp_number">
-							<a :href="whatsappUrl" class="text-char-500 hover:text-chili-700" rel="noopener">
+							<a :href="whatsappUrl" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700" rel="noopener">
 								WhatsApp
 							</a>
 						</li>
 						<li v-if="store.support_email">
-							<a :href="`mailto:${store.support_email}`" class="text-char-500 hover:text-chili-700">
+							<a :href="`mailto:${store.support_email}`" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700">
 								{{ store.support_email }}
 							</a>
 						</li>
@@ -52,7 +61,17 @@ import { store } from '../lib/boot';
 export default defineComponent({
 	name: 'AppFooter',
 	data() {
-		return { store, year: new Date().getFullYear() };
+		return {
+			store,
+			year: new Date().getFullYear(),
+			shopLinks: [
+				{ to: '/packs', label: 'All packs' },
+				{ to: '/cart', label: 'Your cart' },
+				{ to: '/track', label: 'Track order' },
+				{ to: '/about', label: 'About us' },
+				{ to: '/contact', label: 'Contact' }
+			]
+		};
 	},
 	computed: {
 		whatsappUrl(): string {

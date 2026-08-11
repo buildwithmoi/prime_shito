@@ -8,7 +8,7 @@
 			inputmode="numeric"
 			:maxlength="length"
 			autocomplete="one-time-code"
-			class="mt-1.5 h-14 w-full rounded-xl border bg-white text-center text-2xl font-bold tracking-[0.5em] text-char-900 transition focus:outline-none"
+			class="mt-1.5 h-14 w-full rounded-xl border bg-white text-center text-2xl font-bold tracking-[0.5em] text-char-900 transition-colors duration-(--duration-fast) focus:outline-none"
 			:class="error ? 'border-chili-600' : 'border-cream-200 focus:border-chili-600'"
 			:value="modelValue"
 			:disabled="disabled"

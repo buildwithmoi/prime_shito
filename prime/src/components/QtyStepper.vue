@@ -2,7 +2,7 @@
 	<div class="inline-flex items-center rounded-xl border border-cream-200 bg-white">
 		<button
 			type="button"
-			class="grid h-11 w-11 place-items-center rounded-l-xl text-lg font-semibold text-char-700 transition hover:bg-cream-100 disabled:cursor-not-allowed disabled:text-char-400"
+			class="grid h-11 w-11 place-items-center rounded-l-xl text-lg font-semibold text-char-700 transition-colors duration-(--duration-fast) hover:bg-cream-100 disabled:cursor-not-allowed disabled:text-char-400"
 			:disabled="modelValue <= min"
 			:aria-label="`Reduce quantity of ${label}`"
 			@click="step(-1)"
@@ -23,7 +23,7 @@
 
 		<button
 			type="button"
-			class="grid h-11 w-11 place-items-center rounded-r-xl text-lg font-semibold text-char-700 transition hover:bg-cream-100 disabled:cursor-not-allowed disabled:text-char-400"
+			class="grid h-11 w-11 place-items-center rounded-r-xl text-lg font-semibold text-char-700 transition-colors duration-(--duration-fast) hover:bg-cream-100 disabled:cursor-not-allowed disabled:text-char-400"
 			:disabled="modelValue >= max"
 			:aria-label="`Increase quantity of ${label}`"
 			@click="step(1)"

@@ -9,7 +9,7 @@
 		<div v-if="flavours.length > 1" class="mt-6 flex flex-wrap gap-2">
 			<button
 				type="button"
-				class="h-10 rounded-full px-4 text-sm font-medium transition"
+				class="h-10 rounded-full px-4 text-sm font-medium transition-colors duration-(--duration-fast)"
 				:class="
 					activeFlavour === null
 						? 'bg-chili-600 text-white'
@@ -23,7 +23,7 @@
 				v-for="flavour in flavours"
 				:key="flavour"
 				type="button"
-				class="h-10 rounded-full px-4 text-sm font-medium transition"
+				class="h-10 rounded-full px-4 text-sm font-medium transition-colors duration-(--duration-fast)"
 				:class="
 					activeFlavour === flavour
 						? 'bg-chili-600 text-white'

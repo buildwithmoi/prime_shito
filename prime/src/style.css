@@ -32,6 +32,71 @@
 	/* System fonts only. A single web font weight is roughly 30 KB, which is a
 	   real cost on a metered Ghanaian mobile plan. */
 	--font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+	/* Iconography. Named so icons stop being improvised at the point of use --
+	   which is how 14 emoji ended up doing an icon's job. 1.8 matches the cart
+	   in AppHeader, the pattern this app already chose. */
+	--size-icon-sm: 1rem;
+	--size-icon-md: 1.25rem;
+	--size-icon-lg: 1.5rem;
+	--stroke-icon: 1.8;
+
+	/* Motion. Three durations, deliberately. A fourth means something else is
+	   wrong. Bare `transition` in Tailwind is 150ms for every property at once,
+	   which is why a button hover and a whole cart row used to move alike. */
+	--ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
+	--duration-fast: 120ms; /* colour, border, opacity on hover and press */
+	--duration-base: 200ms; /* things entering or leaving the page */
+	--duration-slow: 320ms; /* the one deliberate flourish per screen */
+}
+
+/*
+ * Buttons. One definition rather than the same 15-class string repeated across
+ * eight views, so a token change lands everywhere at once.
+ */
+@utility btn-base {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 3rem;
+	border-radius: var(--radius-xl);
+	padding-inline: 1.5rem;
+	font-weight: 600;
+	transition-property: color, background-color, border-color, opacity;
+	transition-duration: var(--duration-fast);
+	transition-timing-function: var(--ease-out-soft);
+}
+
+@utility btn-primary {
+	@apply btn-base;
+	background-color: var(--color-chili-600);
+	color: #fff;
+
+	&:hover:not(:disabled) {
+		background-color: var(--color-chili-700);
+	}
+
+	&:disabled {
+		background-color: var(--color-char-400);
+		cursor: not-allowed;
+	}
+}
+
+@utility btn-secondary {
+	@apply btn-base;
+	border: 1px solid var(--color-cream-200);
+	background-color: #fff;
+	color: var(--color-char-700);
+
+	&:hover:not(:disabled) {
+		border-color: var(--color-chili-200);
+		color: var(--color-chili-700);
+	}
+
+	&:disabled {
+		color: var(--color-char-400);
+		cursor: not-allowed;
+	}
 }
 
 html {
@@ -52,6 +117,76 @@ body {
 	outline-offset: 2px;
 }
 
+/*
+ * Icon stroke. Applied as CSS rather than a `stroke-width` attribute so the
+ * token is the single source of truth -- a token nothing reads is just a
+ * comment, and the point of naming these was to stop the next change inventing
+ * its own number.
+ */
+@utility stroke-icon {
+	stroke-width: var(--stroke-icon);
+}
+
+/* The mobile nav row scrolls; a visible scrollbar under four links is noise. */
+@utility scrollbar-none {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+/*
+ * Route transitions. 4px of travel, not 20 -- this is a shop on a phone, and
+ * movement large enough to notice is movement large enough to wait for.
+ * `mode="out-in"` in App.vue keeps the pages from overlapping and jumping the
+ * footer.
+ */
+.page-enter-active,
+.page-leave-active {
+	transition:
+		opacity var(--duration-base) var(--ease-out-soft),
+		transform var(--duration-base) var(--ease-out-soft);
+}
+
+.page-enter-from,
+.page-leave-to {
+	opacity: 0;
+	transform: translateY(4px);
+}
+
+/*
+ * Cart rows. Removing something is the one destructive action in the app, so
+ * it gets an acknowledgement. `position: absolute` while leaving takes the row
+ * out of flow, letting the rows below slide up rather than snap.
+ */
+.row-enter-active,
+.row-leave-active {
+	transition:
+		opacity var(--duration-base) var(--ease-out-soft),
+		transform var(--duration-base) var(--ease-out-soft);
+}
+
+.row-enter-from,
+.row-leave-to {
+	opacity: 0;
+	transform: translateX(-8px);
+}
+
+.row-leave-active {
+	position: absolute;
+	width: 100%;
+}
+
+.row-move {
+	transition: transform var(--duration-base) var(--ease-out-soft);
+}
+
+/*
+ * This block is load-bearing: it is what keeps every transition above honest
+ * for anyone who has asked their OS not to animate. Everything still works,
+ * just instantly.
+ */
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto;

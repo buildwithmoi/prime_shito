@@ -16,12 +16,9 @@
 			</p>
 		</div>
 
-		<router-link
-			to="/packs"
-			class="mt-8 inline-flex h-12 items-center rounded-xl bg-chili-600 px-6 font-semibold text-white transition hover:bg-chili-700"
-		>
-			See our packs
-		</router-link>
+		<!-- Kept rather than deleted as a Home duplicate: this is the only exit
+		     from a content page, and the copy is its own. -->
+		<router-link to="/packs" class="btn-primary mt-8">See our packs</router-link>
 	</div>
 </template>
 

@@ -5,14 +5,14 @@
 			:loading="loading"
 			:error="error"
 			loading-text="Loading this pack…"
-			empty-icon="🔍"
+			:empty-icon="IconSearch"
 			empty-title="We could not find that pack"
 			empty-text="It may have been renamed or is no longer sold."
 		>
 			<template #empty-action>
 				<router-link
 					to="/packs"
-					class="mt-5 inline-flex h-11 items-center rounded-xl bg-chili-600 px-5 text-sm font-semibold text-white transition hover:bg-chili-700"
+					class="btn-primary mt-5 h-11 px-5 text-sm"
 				>
 					See all packs
 				</router-link>
@@ -21,7 +21,7 @@
 
 		<div v-else class="mx-auto max-w-5xl px-4 py-8 pb-28 sm:pb-8">
 			<nav class="mb-6 text-sm text-char-400">
-				<router-link to="/packs" class="hover:text-chili-700">Packs</router-link>
+				<router-link to="/packs" class="transition-colors duration-(--duration-fast) hover:text-chili-700">Packs</router-link>
 				<span class="mx-2" aria-hidden="true">/</span>
 				<span class="text-char-700">{{ pack.pack_name }}</span>
 			</nav>
@@ -29,15 +29,7 @@
 			<div class="grid gap-8 md:grid-cols-2">
 				<div class="space-y-3">
 					<div class="aspect-square overflow-hidden rounded-2xl bg-cream-100">
-						<img
-							v-if="activeImage"
-							:src="activeImage"
-							:alt="pack.pack_name"
-							class="h-full w-full object-cover"
-							width="600"
-							height="600"
-						/>
-						<div v-else class="grid h-full w-full place-items-center text-7xl" aria-hidden="true">🌶️</div>
+						<PackImage :src="activeImage" :alt="pack.pack_name" eager />
 					</div>
 
 					<div v-if="images.length > 1" class="flex gap-3">
@@ -45,7 +37,7 @@
 							v-for="img in images"
 							:key="img"
 							type="button"
-							class="h-20 w-20 overflow-hidden rounded-xl border-2 transition"
+							class="h-20 w-20 overflow-hidden rounded-xl border-2 transition-colors duration-(--duration-fast)"
 							:class="activeImage === img ? 'border-chili-600' : 'border-cream-200'"
 							@click="activeImage = img"
 						>
@@ -101,7 +93,7 @@
 						<QtyStepper v-model="qty" :min="minQty" :max="maxQty" :label="pack.pack_name" />
 						<button
 							type="button"
-							class="h-12 flex-1 rounded-xl bg-chili-600 px-6 font-semibold text-white transition hover:bg-chili-700"
+							class="btn-primary h-12 flex-1"
 							@click="addToCart"
 						>
 							{{ added ? 'Added to cart' : `Add to cart — ${money(pack.price * qty)}` }}
@@ -126,7 +118,7 @@
 				<QtyStepper v-model="qty" :min="minQty" :max="maxQty" :label="pack.pack_name" />
 				<button
 					type="button"
-					class="h-12 flex-1 rounded-xl bg-chili-600 px-4 font-semibold text-white transition hover:bg-chili-700"
+					class="btn-primary h-12 flex-1 px-4"
 					@click="addToCart"
 				>
 					{{ added ? 'Added' : `Add — ${money(pack.price * qty)}` }}
@@ -141,6 +133,8 @@ import { defineComponent } from 'vue';
 
 import QtyStepper from '../components/QtyStepper.vue';
 import StateBlock from '../components/StateBlock.vue';
+import PackImage from '../components/PackImage.vue';
+import IconSearch from '../components/icons/IconSearch.vue';
 import cart from '../stores/cart';
 import call from '../lib/call';
 import { money } from '../lib/money';
@@ -150,13 +144,14 @@ import type { Pack } from '../lib/types';
 
 export default defineComponent({
 	name: 'PackDetailView',
-	components: { QtyStepper, StateBlock },
+	components: { QtyStepper, StateBlock, PackImage },
 	props: {
 		route: { type: String, required: true }
 	},
 	emits: ['catalog-loaded'],
 	data() {
 		return {
+			IconSearch,
 			pack: null as Pack | null,
 			activeImage: null as string | null,
 			qty: 1,

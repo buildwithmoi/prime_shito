@@ -11,7 +11,7 @@
 		:href="url"
 		target="_blank"
 		rel="noopener"
-		class="fixed bottom-5 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] shadow-lg shadow-black/20 transition hover:scale-105 print:hidden"
+		class="fixed bottom-5 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] shadow-lg shadow-black/20 transition-transform duration-(--duration-fast) ease-(--ease-out-soft) hover:scale-105 print:hidden"
 		aria-label="Order on WhatsApp"
 	>
 		<svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 text-white" aria-hidden="true">

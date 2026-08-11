@@ -1,17 +1,13 @@
 <template>
 	<article
-		class="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 bg-white transition hover:border-chili-200 hover:shadow-lg hover:shadow-chili-600/5"
+		class="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 bg-white transition-[border-color,box-shadow] duration-(--duration-fast) hover:border-chili-200 hover:shadow-lg hover:shadow-chili-600/5"
 	>
 		<router-link :to="`/packs/${pack.route}`" class="relative block aspect-square overflow-hidden bg-cream-100">
-			<img
-				v-if="pack.image"
-				:src="pack.image"
-				:alt="pack.pack_name"
-				loading="lazy"
-				decoding="async"
-				class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-			/>
-			<div v-else class="grid h-full w-full place-items-center text-5xl" aria-hidden="true">🌶️</div>
+			<!-- The one scale transform in the app. Keeping it singular means the
+			     storefront has a signature move rather than five competing ones. -->
+			<div class="h-full w-full transition-transform duration-(--duration-slow) ease-(--ease-out-soft) group-hover:scale-105">
+				<PackImage :src="pack.image" :alt="pack.pack_name" />
+			</div>
 
 			<span
 				v-if="pack.sold_out"
@@ -57,7 +53,7 @@
 
 				<button
 					type="button"
-					class="h-11 rounded-xl bg-chili-600 px-4 text-sm font-semibold text-white transition hover:bg-chili-700 disabled:cursor-not-allowed disabled:bg-char-400"
+					class="btn-primary h-11 px-4 text-sm"
 					:disabled="pack.sold_out"
 					@click="add"
 				>
@@ -70,12 +66,14 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
+import PackImage from './PackImage.vue';
 import cart from '../stores/cart';
 import { money } from '../lib/money';
 import type { Pack } from '../lib/types';
 
 export default defineComponent({
 	name: 'PackCard',
+	components: { PackImage },
 	props: {
 		pack: { type: Object as PropType<Pack>, required: true }
 	},

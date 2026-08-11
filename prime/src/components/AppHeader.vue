@@ -27,7 +27,7 @@
 					v-for="link in links"
 					:key="link.to"
 					:to="link.to"
-					class="rounded-lg px-3 py-2 text-sm font-medium text-char-700 transition hover:bg-cream-100 hover:text-chili-700"
+					class="rounded-lg px-3 py-2 text-sm font-medium text-char-700 transition-colors duration-(--duration-fast) hover:bg-cream-100 hover:text-chili-700"
 					active-class="text-chili-700"
 				>
 					{{ link.label }}
@@ -36,14 +36,10 @@
 
 			<router-link
 				to="/cart"
-				class="relative ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cream-200 bg-white text-char-700 transition hover:border-chili-200 hover:text-chili-700 sm:ml-0"
+				class="relative ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cream-200 bg-white text-char-700 transition-colors duration-(--duration-fast) hover:border-chili-200 hover:text-chili-700 sm:ml-0"
 				:aria-label="cartLabel"
 			>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
-					<path d="M3 3h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L21 7H6" stroke-linecap="round" stroke-linejoin="round" />
-					<circle cx="10" cy="20" r="1.4" fill="currentColor" stroke="none" />
-					<circle cx="17" cy="20" r="1.4" fill="currentColor" stroke="none" />
-				</svg>
+				<IconCart class="size-(--size-icon-md)" />
 				<span
 					v-if="count > 0"
 					class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-chili-600 px-1 text-xs font-bold text-white"
@@ -52,24 +48,56 @@
 				</span>
 			</router-link>
 		</div>
+
+		<!--
+			Mobile navigation. Until now the phone header was a logo and a cart
+			icon, which left Shop, About and Contact unreachable from every page on
+			the device most customers actually use.
+
+			A scrollable inline row rather than a drawer: four links do not justify
+			an open/close state, and a row that is always visible cannot be left
+			shut.
+		-->
+		<nav
+			class="scrollbar-none -mt-px flex gap-1 overflow-x-auto border-t border-cream-200 px-4 py-2 sm:hidden"
+			aria-label="Main"
+		>
+			<router-link
+				v-for="link in mobileLinks"
+				:key="link.to"
+				:to="link.to"
+				class="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-char-700 transition-colors duration-(--duration-fast)"
+				active-class="bg-chili-50 text-chili-700"
+			>
+				{{ link.label }}
+			</router-link>
+		</nav>
 	</header>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import IconCart from './icons/IconCart.vue';
 import cart from '../stores/cart';
 import { store } from '../lib/boot';
 
+const LINKS = [
+	{ to: '/packs', label: 'Shop' },
+	{ to: '/about', label: 'About' },
+	{ to: '/contact', label: 'Contact' }
+];
+
 export default defineComponent({
 	name: 'AppHeader',
+	components: { IconCart },
 	data() {
 		return {
 			store,
-			links: [
-				{ to: '/packs', label: 'Shop' },
-				{ to: '/about', label: 'About' },
-				{ to: '/contact', label: 'Contact' }
-			]
+			links: LINKS,
+			// Track is reachable from the front page on desktop, but on a phone
+			// this row is the only way to it.
+			mobileLinks: [...LINKS, { to: '/track', label: 'Track order' }]
 		};
 	},
 	computed: {

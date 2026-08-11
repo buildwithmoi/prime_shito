@@ -4,14 +4,14 @@
 
 		<StateBlock
 			v-if="isEmpty"
-			empty-icon="🛒"
+			:empty-icon="IconCart"
 			empty-title="Your cart is empty"
 			empty-text="Add a pack and it will show up here."
 		>
 			<template #empty-action>
 				<router-link
 					to="/packs"
-					class="mt-5 inline-flex h-11 items-center rounded-xl bg-chili-600 px-5 text-sm font-semibold text-white transition hover:bg-chili-700"
+					class="btn-primary mt-5 h-11 px-5 text-sm"
 				>
 					Browse packs
 				</router-link>
@@ -19,20 +19,18 @@
 		</StateBlock>
 
 		<div v-else class="mt-6 space-y-6">
-			<!-- Lines -->
-			<ul class="divide-y divide-cream-200 overflow-hidden rounded-2xl border border-cream-200 bg-white">
+			<!-- Removing a row is the one destructive action in the shop, so it is
+			     acknowledged: the row fades out and the ones below slide up rather
+			     than snapping. `relative` gives the absolutely-positioned leaving
+			     row something to anchor to. -->
+			<TransitionGroup
+				tag="ul"
+				name="row"
+				class="relative divide-y divide-cream-200 overflow-hidden rounded-2xl border border-cream-200 bg-white"
+			>
 				<li v-for="line in displayLines" :key="line.pack" class="flex gap-4 p-4">
 					<div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-cream-100">
-						<img
-							v-if="line.image"
-							:src="line.image"
-							:alt="line.pack_name"
-							class="h-full w-full object-cover"
-							loading="lazy"
-							width="80"
-							height="80"
-						/>
-						<div v-else class="grid h-full w-full place-items-center text-2xl" aria-hidden="true">🌶️</div>
+						<PackImage :src="line.image" :alt="line.pack_name" />
 					</div>
 
 					<div class="min-w-0 flex-1">
@@ -40,7 +38,7 @@
 							<h2 class="font-semibold leading-tight text-char-900">{{ line.pack_name }}</h2>
 							<button
 								type="button"
-								class="shrink-0 text-sm text-char-400 transition hover:text-chili-700"
+								class="shrink-0 text-sm text-char-400 transition-colors duration-(--duration-fast) hover:text-chili-700"
 								:aria-label="`Remove ${line.pack_name}`"
 								@click="remove(line.pack)"
 							>
@@ -62,7 +60,7 @@
 						</div>
 					</div>
 				</li>
-			</ul>
+			</TransitionGroup>
 
 			<!-- Delivery -->
 			<section class="rounded-2xl border border-cream-200 bg-white p-4">
@@ -73,7 +71,7 @@
 						v-for="type in ['Delivery', 'Pickup']"
 						:key="type"
 						type="button"
-						class="h-11 flex-1 rounded-xl text-sm font-medium transition"
+						class="h-11 flex-1 rounded-xl text-sm font-medium transition-colors duration-(--duration-fast)"
 						:class="
 							fulfilmentType === type
 								? 'bg-chili-600 text-white'
@@ -131,31 +129,10 @@
 			</div>
 
 			<!-- Totals -->
-			<section class="rounded-2xl border border-cream-200 bg-white p-4">
-				<dl class="space-y-2 text-sm">
-					<div class="flex justify-between">
-						<dt class="text-char-500">Subtotal</dt>
-						<dd class="font-medium text-char-900">{{ money(quote?.items_total ?? 0) }}</dd>
-					</div>
-					<div class="flex justify-between">
-						<dt class="text-char-500">Delivery</dt>
-						<dd class="font-medium text-char-900">
-							<span v-if="quote?.free_delivery_applied" class="text-chili-700">Free</span>
-							<span v-else-if="!zone && fulfilmentType === 'Delivery'" class="text-char-400">
-								Choose an area
-							</span>
-							<span v-else>{{ money(quote?.delivery_fee ?? 0) }}</span>
-						</dd>
-					</div>
-					<div class="flex justify-between border-t border-cream-200 pt-3 text-base">
-						<dt class="font-semibold text-char-900">Total</dt>
-						<dd class="font-bold text-char-900">{{ money(quote?.grand_total ?? 0) }}</dd>
-					</div>
-				</dl>
-
+			<OrderSummary :quote="quote" :awaiting-zone="!zone && fulfilmentType === 'Delivery'">
 				<button
 					type="button"
-					class="mt-5 h-12 w-full rounded-xl bg-chili-600 font-semibold text-white transition hover:bg-chili-700 disabled:cursor-not-allowed disabled:bg-char-400"
+					class="btn-primary mt-5 h-12 w-full"
 					:disabled="!canCheckout"
 					@click="checkout"
 				>
@@ -167,7 +144,7 @@
 				<p class="mt-3 text-center text-xs text-char-400">
 					Prices are confirmed by our server, never by your browser.
 				</p>
-			</section>
+			</OrderSummary>
 		</div>
 	</div>
 </template>
@@ -177,6 +154,9 @@ import { defineComponent } from 'vue';
 
 import QtyStepper from '../components/QtyStepper.vue';
 import StateBlock from '../components/StateBlock.vue';
+import PackImage from '../components/PackImage.vue';
+import OrderSummary from '../components/OrderSummary.vue';
+import IconCart from '../components/icons/IconCart.vue';
 import cart from '../stores/cart';
 import call from '../lib/call';
 import { money } from '../lib/money';
@@ -186,10 +166,11 @@ import type { Quote, QuoteLine, Zone } from '../lib/types';
 
 export default defineComponent({
 	name: 'CartView',
-	components: { QtyStepper, StateBlock },
+	components: { QtyStepper, StateBlock, PackImage, OrderSummary },
 	emits: ['catalog-loaded'],
 	data() {
 		return {
+			IconCart,
 			sf,
 			store,
 			quote: null as Quote | null,

@@ -1,9 +1,11 @@
 <template>
 	<div class="mx-auto max-w-2xl px-4 py-8">
 		<!-- Success -->
+		<!-- No party popper. The customer has just spent money and is looking for
+		     their tracking code; the app congratulating itself is not what the
+		     moment is for. Lead with the code. -->
 		<div v-if="placed" class="text-center">
-			<div class="text-5xl" aria-hidden="true">🎉</div>
-			<h1 class="mt-4 text-2xl font-bold text-char-900">Order received</h1>
+			<h1 class="text-2xl font-bold text-char-900">Order received</h1>
 			<p class="mt-2 text-char-500">
 				Thank you, {{ firstName }}. We will confirm your order shortly.
 			</p>
@@ -28,13 +30,13 @@
 			</dl>
 
 			<div class="mt-6 flex flex-col gap-3">
-				<router-link
-					:to="`/track/${placed.tracking_code}`"
-					class="inline-flex h-12 items-center justify-center rounded-xl bg-chili-600 px-6 font-semibold text-white transition hover:bg-chili-700"
-				>
+				<router-link :to="`/track/${placed.tracking_code}`" class="btn-primary">
 					Track this order
 				</router-link>
-				<router-link to="/packs" class="text-sm font-medium text-chili-700 hover:underline">
+				<router-link
+					to="/packs"
+					class="text-sm font-medium text-chili-700 transition-colors duration-(--duration-fast) hover:underline"
+				>
 					Order something else
 				</router-link>
 			</div>
@@ -53,16 +55,11 @@
 					:aria-current="step === i + 1 ? 'step' : undefined"
 				>
 					<span
-						class="grid h-7 w-7 shrink-0 place-items-center rounded-full transition"
-						:class="
-							step > i + 1
-								? 'bg-chili-600 text-white'
-								: step === i + 1
-									? 'bg-chili-600 text-white'
-									: 'bg-cream-200 text-char-500'
-						"
+						class="grid h-7 w-7 shrink-0 place-items-center rounded-full transition-colors duration-(--duration-fast)"
+						:class="step >= i + 1 ? 'bg-chili-600 text-white' : 'bg-cream-200 text-char-500'"
 					>
-						{{ step > i + 1 ? '✓' : i + 1 }}
+						<IconCheck v-if="step > i + 1" class="size-(--size-icon-sm)" />
+						<template v-else>{{ i + 1 }}</template>
 					</span>
 					<span class="hidden sm:inline" :class="step >= i + 1 ? 'text-char-900' : 'text-char-400'">
 						{{ label }}
@@ -70,16 +67,23 @@
 				</li>
 			</ol>
 
+			<!-- On a phone the row above is four numbered circles and nothing else,
+			     which announces "this takes 4 steps" without saying what any of them
+			     are. This line carries the words the circles cannot. -->
+			<p class="mt-2 text-sm font-medium text-char-700 sm:hidden">
+				Step {{ step }} of {{ stepLabels.length }} · {{ stepLabels[step - 1] }}
+			</p>
+
 			<StateBlock
 				v-if="cartEmpty"
-				empty-icon="🛒"
+				:empty-icon="IconCart"
 				empty-title="Your cart is empty"
 				empty-text="Add a pack before checking out."
 			>
 				<template #empty-action>
 					<router-link
 						to="/packs"
-						class="mt-5 inline-flex h-11 items-center rounded-xl bg-chili-600 px-5 text-sm font-semibold text-white transition hover:bg-chili-700"
+						class="btn-primary mt-5 h-11 px-5 text-sm"
 					>
 						Browse packs
 					</router-link>
@@ -87,201 +91,188 @@
 			</StateBlock>
 
 			<form v-else class="mt-8 space-y-6" @submit.prevent="onSubmit">
-				<!-- 1. Contact -->
-				<fieldset v-show="step === 1" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
-					<legend class="px-1 text-sm font-semibold text-char-900">Your details</legend>
+				<!-- Steps are v-if rather than v-show: display cannot be animated.
+				     Safe because every value lives in data().form, not in the DOM, so
+				     nothing is lost going back from Verify to Details. -->
+				<Transition name="page" mode="out-in" @after-enter="onStepShown">
+					<!-- 1. Contact -->
+					<fieldset v-if="step === 1" key="step-1" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
+						<legend class="px-1 text-sm font-semibold text-char-900">Your details</legend>
 
-					<div>
-						<label for="name" class="block text-sm font-medium text-char-700">Full name</label>
-						<input
-							id="name"
-							v-model="form.customer_name"
-							type="text"
-							autocomplete="name"
-							maxlength="140"
-							class="mt-1.5 h-12 w-full rounded-xl border border-cream-200 bg-white px-3 text-char-900 focus:border-chili-600 focus:outline-none"
-							placeholder="Ama Mensah"
-						/>
-					</div>
-
-					<PhoneInput v-model="form.phone" :error="errors.phone" />
-				</fieldset>
-
-				<!-- 2. Verify -->
-				<fieldset v-show="step === 2" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
-					<legend class="px-1 text-sm font-semibold text-char-900">Verify your number</legend>
-
-					<p class="text-sm text-char-500">
-						We sent a code to <span class="font-medium text-char-900">{{ maskedPhone }}</span
-						>. This makes sure we can reach you about your order.
-					</p>
-
-					<div v-if="devOtp" class="rounded-xl bg-cream-100 px-3 py-2 text-sm text-char-700">
-						Developer mode — your code is <strong>{{ devOtp }}</strong>
-					</div>
-
-					<OtpInput v-model="form.otp" :error="errors.otp" @complete="verifyOtp" />
-
-					<div class="flex items-center justify-between text-sm">
-						<button
-							type="button"
-							class="font-medium text-chili-700 hover:underline disabled:text-char-400 disabled:no-underline"
-							:disabled="resendIn > 0 || busy"
-							@click="requestOtp"
-						>
-							{{ resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend code' }}
-						</button>
-						<button type="button" class="text-char-500 hover:text-chili-700" @click="step = 1">
-							Change number
-						</button>
-					</div>
-				</fieldset>
-
-				<!-- 3. Delivery -->
-				<fieldset v-show="step === 3" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
-					<legend class="px-1 text-sm font-semibold text-char-900">Where should we send it?</legend>
-
-					<div class="flex gap-2">
-						<button
-							v-for="type in (['Delivery', 'Pickup'] as const)"
-							:key="type"
-							type="button"
-							class="h-11 flex-1 rounded-xl text-sm font-medium transition"
-							:class="
-								fulfilmentType === type
-									? 'bg-chili-600 text-white'
-									: 'border border-cream-200 text-char-700 hover:border-chili-200'
-							"
-							@click="setFulfilment(type)"
-						>
-							{{ type }}
-						</button>
-					</div>
-
-					<template v-if="fulfilmentType === 'Delivery'">
 						<div>
-							<label for="zone" class="block text-sm font-medium text-char-700">Delivery area</label>
-							<select
-								id="zone"
+							<label for="name" class="block text-sm font-medium text-char-700">Full name</label>
+							<input
+								id="name"
+								v-model="form.customer_name"
+								type="text"
+								autocomplete="name"
+								maxlength="140"
 								class="mt-1.5 h-12 w-full rounded-xl border border-cream-200 bg-white px-3 text-char-900 focus:border-chili-600 focus:outline-none"
-								:value="zone ?? ''"
-								@change="onZoneChange"
-							>
-								<option value="">Select your area…</option>
-								<option v-for="z in sf.zones" :key="z.zone" :value="z.zone">
-									{{ z.zone_name }} — {{ money(z.delivery_fee) }}
-								</option>
-							</select>
-							<p v-if="errors.zone" class="mt-1 text-xs text-chili-700">{{ errors.zone }}</p>
+								placeholder="Ama Mensah"
+							/>
 						</div>
 
+						<PhoneInput v-model="form.phone" :error="errors.phone" />
+					</fieldset>
+
+					<!-- 2. Verify -->
+					<fieldset v-else-if="step === 2" key="step-2" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
+						<legend class="px-1 text-sm font-semibold text-char-900">Verify your number</legend>
+
+						<p class="text-sm text-char-500">
+							We sent a code to <span class="font-medium text-char-900">{{ maskedPhone }}</span
+							>. This makes sure we can reach you about your order.
+						</p>
+
+						<div v-if="devOtp" class="rounded-xl bg-cream-100 px-3 py-2 text-sm text-char-700">
+							Developer mode — your code is <strong>{{ devOtp }}</strong>
+						</div>
+
+						<OtpInput ref="otp" v-model="form.otp" :error="errors.otp" @complete="verifyOtp" />
+
+						<div class="flex items-center justify-between text-sm">
+							<button
+								type="button"
+								class="font-medium text-chili-700 transition-colors duration-(--duration-fast) hover:underline disabled:text-char-400 disabled:no-underline"
+								:disabled="resendIn > 0 || busy"
+								@click="requestOtp"
+							>
+								{{ resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend code' }}
+							</button>
+							<button type="button" class="text-char-500 transition-colors duration-(--duration-fast) hover:text-chili-700" @click="step = 1">
+								Change number
+							</button>
+						</div>
+					</fieldset>
+
+					<!-- 3. Delivery -->
+					<fieldset v-else-if="step === 3" key="step-3" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
+						<legend class="px-1 text-sm font-semibold text-char-900">Where should we send it?</legend>
+
+						<div class="flex gap-2">
+							<button
+								v-for="type in (['Delivery', 'Pickup'] as const)"
+								:key="type"
+								type="button"
+								class="h-11 flex-1 rounded-xl text-sm font-medium transition-colors duration-(--duration-fast)"
+								:class="
+									fulfilmentType === type
+										? 'bg-chili-600 text-white'
+										: 'border border-cream-200 text-char-700 hover:border-chili-200'
+								"
+								@click="setFulfilment(type)"
+							>
+								{{ type }}
+							</button>
+						</div>
+
+						<template v-if="fulfilmentType === 'Delivery'">
+							<div>
+								<label for="zone" class="block text-sm font-medium text-char-700">Delivery area</label>
+								<select
+									id="zone"
+									class="mt-1.5 h-12 w-full rounded-xl border border-cream-200 bg-white px-3 text-char-900 focus:border-chili-600 focus:outline-none"
+									:value="zone ?? ''"
+									@change="onZoneChange"
+								>
+									<option value="">Select your area…</option>
+									<option v-for="z in sf.zones" :key="z.zone" :value="z.zone">
+										{{ z.zone_name }} — {{ money(z.delivery_fee) }}
+									</option>
+								</select>
+								<p v-if="errors.zone" class="mt-1 text-xs text-chili-700">{{ errors.zone }}</p>
+							</div>
+
+							<div>
+								<label for="address" class="block text-sm font-medium text-char-700">Address</label>
+								<textarea
+									id="address"
+									v-model="form.delivery_address"
+									rows="2"
+									maxlength="500"
+									class="mt-1.5 w-full rounded-xl border border-cream-200 bg-white p-3 text-char-900 focus:border-chili-600 focus:outline-none"
+									placeholder="House number, street, area"
+								/>
+								<p v-if="errors.address" class="mt-1 text-xs text-chili-700">{{ errors.address }}</p>
+							</div>
+
+							<div>
+								<label for="landmark" class="block text-sm font-medium text-char-700">
+									Nearest landmark <span class="font-normal text-char-400">(optional)</span>
+								</label>
+								<input
+									id="landmark"
+									v-model="form.landmark"
+									type="text"
+									maxlength="140"
+									class="mt-1.5 h-12 w-full rounded-xl border border-cream-200 bg-white px-3 text-char-900 focus:border-chili-600 focus:outline-none"
+									placeholder="Opposite the filling station"
+								/>
+								<p class="mt-1 text-xs text-char-400">Landmarks help our riders far more than street names.</p>
+							</div>
+						</template>
+
 						<div>
-							<label for="address" class="block text-sm font-medium text-char-700">Address</label>
+							<label for="notes" class="block text-sm font-medium text-char-700">
+								Notes <span class="font-normal text-char-400">(optional)</span>
+							</label>
 							<textarea
-								id="address"
-								v-model="form.delivery_address"
+								id="notes"
+								v-model="form.delivery_notes"
 								rows="2"
 								maxlength="500"
 								class="mt-1.5 w-full rounded-xl border border-cream-200 bg-white p-3 text-char-900 focus:border-chili-600 focus:outline-none"
-								placeholder="House number, street, area"
+								placeholder="Call when you arrive"
 							/>
-							<p v-if="errors.address" class="mt-1 text-xs text-chili-700">{{ errors.address }}</p>
 						</div>
+					</fieldset>
 
-						<div>
-							<label for="landmark" class="block text-sm font-medium text-char-700">
-								Nearest landmark <span class="font-normal text-char-400">(optional)</span>
-							</label>
-							<input
-								id="landmark"
-								v-model="form.landmark"
-								type="text"
-								maxlength="140"
-								class="mt-1.5 h-12 w-full rounded-xl border border-cream-200 bg-white px-3 text-char-900 focus:border-chili-600 focus:outline-none"
-								placeholder="Opposite the filling station"
-							/>
-							<p class="mt-1 text-xs text-char-400">Landmarks help our riders far more than street names.</p>
-						</div>
-					</template>
+					<!-- 4. Payment -->
+					<fieldset v-else key="step-4" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
+						<legend class="px-1 text-sm font-semibold text-char-900">How would you like to pay?</legend>
 
-					<div>
-						<label for="notes" class="block text-sm font-medium text-char-700">
-							Notes <span class="font-normal text-char-400">(optional)</span>
-						</label>
-						<textarea
-							id="notes"
-							v-model="form.delivery_notes"
-							rows="2"
-							maxlength="500"
-							class="mt-1.5 w-full rounded-xl border border-cream-200 bg-white p-3 text-char-900 focus:border-chili-600 focus:outline-none"
-							placeholder="Call when you arrive"
-						/>
-					</div>
-				</fieldset>
-
-				<!-- 4. Payment -->
-				<fieldset v-show="step === 4" class="space-y-4 rounded-2xl border border-cream-200 bg-white p-4">
-					<legend class="px-1 text-sm font-semibold text-char-900">How would you like to pay?</legend>
-
-					<label
-						v-if="store.allow_pay_on_delivery"
-						class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-						:class="form.payment_method === 'Pay on Delivery' ? 'border-chili-600 bg-chili-50' : 'border-cream-200'"
-					>
-						<input v-model="form.payment_method" type="radio" value="Pay on Delivery" class="mt-1" />
-						<span>
-							<span class="block font-medium text-char-900">Pay on delivery</span>
-							<span class="block text-sm text-char-500">
-								Pay cash or Mobile Money when your order reaches you.
+						<label
+							v-if="store.allow_pay_on_delivery"
+							class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors duration-(--duration-fast)"
+							:class="form.payment_method === 'Pay on Delivery' ? 'border-chili-600 bg-chili-50' : 'border-cream-200'"
+						>
+							<input v-model="form.payment_method" type="radio" value="Pay on Delivery" class="mt-1" />
+							<span>
+								<span class="block font-medium text-char-900">Pay on delivery</span>
+								<span class="block text-sm text-char-500">
+									Pay cash or Mobile Money when your order reaches you.
+								</span>
 							</span>
-						</span>
-					</label>
+						</label>
 
-					<label
-						v-if="store.allow_online_payment"
-						class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-						:class="form.payment_method === 'Pay Online' ? 'border-chili-600 bg-chili-50' : 'border-cream-200'"
-					>
-						<input v-model="form.payment_method" type="radio" value="Pay Online" class="mt-1" />
-						<span>
-							<span class="block font-medium text-char-900">Pay online now</span>
-							<span class="block text-sm text-char-500">Mobile Money or card.</span>
-						</span>
-					</label>
+						<label
+							v-if="store.allow_online_payment"
+							class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors duration-(--duration-fast)"
+							:class="form.payment_method === 'Pay Online' ? 'border-chili-600 bg-chili-50' : 'border-cream-200'"
+						>
+							<input v-model="form.payment_method" type="radio" value="Pay Online" class="mt-1" />
+							<span>
+								<span class="block font-medium text-char-900">Pay online now</span>
+								<span class="block text-sm text-char-500">Mobile Money or card.</span>
+							</span>
+						</label>
 
-					<label class="flex cursor-pointer items-start gap-3 pt-2">
-						<input v-model="form.marketing_consent" type="checkbox" class="mt-1" />
-						<span class="text-sm text-char-500">
-							Text me about new flavours and offers. You can stop this any time.
-						</span>
-					</label>
+						<label class="flex cursor-pointer items-start gap-3 pt-2">
+							<input v-model="form.marketing_consent" type="checkbox" class="mt-1" />
+							<span class="text-sm text-char-500">
+								Text me about new flavours and offers. You can stop this any time.
+							</span>
+						</label>
 
-					<!-- Honeypot: hidden from people, filled by scripted spam. -->
-					<div class="hidden" aria-hidden="true">
-						<label>Do not fill this<input v-model="form.hp" type="text" tabindex="-1" autocomplete="off" /></label>
-					</div>
-				</fieldset>
-
-				<!-- Summary -->
-				<section class="rounded-2xl border border-cream-200 bg-white p-4">
-					<dl class="space-y-2 text-sm">
-						<div class="flex justify-between">
-							<dt class="text-char-500">Subtotal</dt>
-							<dd class="font-medium text-char-900">{{ money(quote?.items_total ?? 0) }}</dd>
+						<!-- Honeypot: hidden from people, filled by scripted spam. -->
+						<div class="hidden" aria-hidden="true">
+							<label>Do not fill this<input v-model="form.hp" type="text" tabindex="-1" autocomplete="off" /></label>
 						</div>
-						<div class="flex justify-between">
-							<dt class="text-char-500">Delivery</dt>
-							<dd class="font-medium text-char-900">
-								<span v-if="quote?.free_delivery_applied" class="text-chili-700">Free</span>
-								<span v-else>{{ money(quote?.delivery_fee ?? 0) }}</span>
-							</dd>
-						</div>
-						<div class="flex justify-between border-t border-cream-200 pt-3 text-base">
-							<dt class="font-semibold text-char-900">Total</dt>
-							<dd class="font-bold text-char-900">{{ money(quote?.grand_total ?? 0) }}</dd>
-						</div>
-					</dl>
-				</section>
+					</fieldset>
+				</Transition>
+
+				<!-- Summary. Shared with Cart so the two cannot drift. -->
+				<OrderSummary :quote="quote" :awaiting-zone="fulfilmentType === 'Delivery' && !zone" />
 
 				<div v-if="formError" class="rounded-xl border border-chili-200 bg-chili-50 px-4 py-3 text-sm text-chili-800" role="alert">
 					{{ formError }}
@@ -291,14 +282,14 @@
 					<button
 						v-if="step > 1 && step !== 2"
 						type="button"
-						class="h-12 rounded-xl border border-cream-200 px-5 font-medium text-char-700 transition hover:border-chili-200"
+						class="btn-secondary h-12 px-5"
 						@click="step--"
 					>
 						Back
 					</button>
 					<button
 						type="submit"
-						class="h-12 flex-1 rounded-xl bg-chili-600 font-semibold text-white transition hover:bg-chili-700 disabled:cursor-not-allowed disabled:bg-char-400"
+						class="btn-primary h-12 flex-1"
 						:disabled="busy"
 					>
 						{{ busy ? 'Please wait…' : submitLabel }}
@@ -315,6 +306,9 @@ import { defineComponent } from 'vue';
 import PhoneInput from '../components/PhoneInput.vue';
 import OtpInput from '../components/OtpInput.vue';
 import StateBlock from '../components/StateBlock.vue';
+import OrderSummary from '../components/OrderSummary.vue';
+import IconCart from '../components/icons/IconCart.vue';
+import IconCheck from '../components/icons/IconCheck.vue';
 import cart from '../stores/cart';
 import call, { FrappeError } from '../lib/call';
 import { money } from '../lib/money';
@@ -324,10 +318,11 @@ import type { Quote } from '../lib/types';
 
 export default defineComponent({
 	name: 'CheckoutView',
-	components: { PhoneInput, OtpInput, StateBlock },
+	components: { PhoneInput, OtpInput, StateBlock, OrderSummary, IconCheck },
 	emits: ['catalog-loaded'],
 	data() {
 		return {
+			IconCart,
 			sf,
 			store,
 			step: 1,
@@ -388,6 +383,14 @@ export default defineComponent({
 	},
 	methods: {
 		money,
+		/**
+		 * Focus the code field once the step has finished animating in.
+		 * `$nextTick` is too early with `mode="out-in"`: the incoming fieldset is
+		 * not mounted until the outgoing one has left.
+		 */
+		onStepShown() {
+			if (this.step === 2) (this.$refs.otp as { focus?: () => void } | undefined)?.focus?.();
+		},
 		setFulfilment(type: 'Delivery' | 'Pickup') {
 			cart.setFulfilmentType(type);
 			this.refreshQuote();
@@ -441,7 +444,6 @@ export default defineComponent({
 				this.devOtp = res.dev_otp || '';
 				this.step = 2;
 				this.startResendTimer(res.resend_in || 60);
-				this.$nextTick(() => (this.$refs.otp as any)?.focus?.());
 			} catch (err) {
 				this.formError = (err as FrappeError).message;
 			} finally {

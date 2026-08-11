@@ -7,7 +7,7 @@
 					<span
 						class="inline-flex items-center gap-1.5 rounded-full bg-chili-50 px-3 py-1 text-xs font-semibold text-chili-700"
 					>
-						🇬🇭 Made fresh in Ghana
+						Made fresh in Ghana
 					</span>
 
 					<h1 class="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-char-900 sm:text-5xl">
@@ -21,7 +21,7 @@
 					<div class="mt-7 flex flex-wrap gap-3">
 						<router-link
 							to="/packs"
-							class="inline-flex h-12 items-center rounded-xl bg-chili-600 px-6 font-semibold text-white transition hover:bg-chili-700"
+							class="btn-primary"
 						>
 							Order now
 						</router-link>
@@ -30,7 +30,7 @@
 							:href="`https://wa.me/${store.whatsapp_number}`"
 							target="_blank"
 							rel="noopener"
-							class="inline-flex h-12 items-center rounded-xl border border-cream-200 bg-white px-6 font-semibold text-char-700 transition hover:border-chili-200 hover:text-chili-700"
+							class="btn-secondary"
 						>
 							Order on WhatsApp
 						</a>
@@ -57,7 +57,7 @@
 					<h2 class="text-2xl font-bold tracking-tight text-char-900">Our packs</h2>
 					<p class="mt-1 text-sm text-char-500">Pre-order and we make yours in the next batch.</p>
 				</div>
-				<router-link to="/packs" class="shrink-0 text-sm font-semibold text-chili-700 hover:underline">
+				<router-link to="/packs" class="shrink-0 text-sm font-semibold text-chili-700 transition-colors duration-(--duration-fast) hover:underline">
 					See all
 				</router-link>
 			</div>
@@ -98,7 +98,7 @@
 					/>
 					<button
 						type="submit"
-						class="h-12 shrink-0 rounded-xl bg-chili-600 px-5 font-semibold text-white transition hover:bg-chili-700"
+						class="btn-primary h-12 shrink-0 px-5"
 					>
 						Track
 					</button>

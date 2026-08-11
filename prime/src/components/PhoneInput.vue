@@ -2,7 +2,7 @@
 	<div>
 		<label :for="id" class="block text-sm font-medium text-char-700">{{ label }}</label>
 		<div
-			class="mt-1.5 flex h-12 items-center overflow-hidden rounded-xl border bg-white transition"
+			class="mt-1.5 flex h-12 items-center overflow-hidden rounded-xl border bg-white transition-colors duration-(--duration-fast)"
 			:class="error ? 'border-chili-600' : 'border-cream-200 focus-within:border-chili-600'"
 		>
 			<span class="grid h-full place-items-center border-r border-cream-200 bg-cream-50 px-3 text-sm font-medium text-char-500">

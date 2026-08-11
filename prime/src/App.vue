@@ -11,8 +11,12 @@
 		</div>
 
 		<main class="flex-1">
+			<!-- `mode="out-in"` is not optional: without it the outgoing and
+			     incoming pages are mounted together and the footer jumps. -->
 			<router-view v-slot="{ Component }">
-				<component :is="Component" @catalog-loaded="onCatalogLoaded" />
+				<Transition name="page" mode="out-in">
+					<component :is="Component" @catalog-loaded="onCatalogLoaded" />
+				</Transition>
 			</router-view>
 		</main>
 
