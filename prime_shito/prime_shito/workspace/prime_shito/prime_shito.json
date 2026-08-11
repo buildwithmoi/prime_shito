@@ -5,7 +5,7 @@
       "label": "Sales Trend"
     }
   ],
-  "content": "[{\"id\": \"hdr_ops\", \"type\": \"header\", \"data\": {\"text\": \"Today\", \"col\": 12}}, {\"id\": \"nc_today\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Orders Today\", \"col\": 3}}, {\"id\": \"nc_await\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Awaiting Approval\", \"col\": 3}}, {\"id\": \"nc_ofd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Out for Delivery\", \"col\": 3}}, {\"id\": \"nc_unpaid\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unpaid Orders\", \"col\": 3}}, {\"id\": \"hdr_money\", \"type\": \"header\", \"data\": {\"text\": \"Sales\", \"col\": 12}}, {\"id\": \"nc_month\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Revenue This Month\", \"col\": 3}}, {\"id\": \"nc_total\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Sales\", \"col\": 3}}, {\"id\": \"nc_owed\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Money Owed\", \"col\": 3}}, {\"id\": \"nc_cust\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Customers\", \"col\": 3}}, {\"id\": \"chart_trend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Shito Sales Trend\", \"col\": 12}}, {\"id\": \"hdr_manage\", \"type\": \"header\", \"data\": {\"text\": \"Manage\", \"col\": 12}}, {\"id\": \"sc_orders\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Order\", \"col\": 3}}, {\"id\": \"sc_packs\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Pack\", \"col\": 3}}, {\"id\": \"sc_zones\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Delivery Zone\", \"col\": 3}}, {\"id\": \"sc_customers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Customer\", \"col\": 3}}, {\"id\": \"sc_settings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Prime Shito Settings\", \"col\": 3}}, {\"id\": \"hdr_sms\", \"type\": \"header\", \"data\": {\"text\": \"Messaging\", \"col\": 12}}, {\"id\": \"nc_sms_n\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SMS Sent This Month\", \"col\": 3}}, {\"id\": \"nc_sms_cost\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SMS Cost This Month\", \"col\": 3}}, {\"id\": \"sc_sms\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito SMS Message\", \"col\": 3}}]",
+  "content": "[{\"id\": \"hdr_ops\", \"type\": \"header\", \"data\": {\"text\": \"Today\", \"col\": 12}}, {\"id\": \"nc_today\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Orders Today\", \"col\": 3}}, {\"id\": \"nc_await\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Awaiting Approval\", \"col\": 3}}, {\"id\": \"nc_ofd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Out for Delivery\", \"col\": 3}}, {\"id\": \"nc_unpaid\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unpaid Orders\", \"col\": 3}}, {\"id\": \"hdr_money\", \"type\": \"header\", \"data\": {\"text\": \"Sales\", \"col\": 12}}, {\"id\": \"nc_month\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Revenue This Month\", \"col\": 3}}, {\"id\": \"nc_total\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Sales\", \"col\": 3}}, {\"id\": \"nc_owed\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Money Owed\", \"col\": 3}}, {\"id\": \"nc_cust\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Customers\", \"col\": 3}}, {\"id\": \"chart_trend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Shito Sales Trend\", \"col\": 12}}, {\"id\": \"hdr_manage\", \"type\": \"header\", \"data\": {\"text\": \"Manage\", \"col\": 12}}, {\"id\": \"sc_orders\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Order\", \"col\": 3}}, {\"id\": \"sc_packs\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Pack\", \"col\": 3}}, {\"id\": \"sc_zones\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Delivery Zone\", \"col\": 3}}, {\"id\": \"sc_customers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito Customer\", \"col\": 3}}, {\"id\": \"sc_settings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Prime Shito Settings\", \"col\": 3}}, {\"id\": \"hdr_sms\", \"type\": \"header\", \"data\": {\"text\": \"Messaging\", \"col\": 12}}, {\"id\": \"nc_sms_n\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SMS Sent This Month\", \"col\": 3}}, {\"id\": \"nc_sms_cost\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SMS Cost This Month\", \"col\": 3}}, {\"id\": \"sc_campaign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito SMS Campaign\", \"col\": 3}}, {\"id\": \"sc_sms\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shito SMS Message\", \"col\": 3}}]",
   "creation": "2026-07-30 10:00:00.000000",
   "docstatus": 0,
   "doctype": "Workspace",
@@ -16,7 +16,7 @@
   "is_hidden": 0,
   "label": "Prime Shito",
   "links": [],
-  "modified": "2026-07-30 12:30:00.000000",
+  "modified": "2026-08-11 21:00:00.000000",
   "modified_by": "Administrator",
   "module": "Prime Shito",
   "name": "Prime Shito",
@@ -68,6 +68,13 @@
       "doc_view": "List",
       "label": "Shito SMS Message",
       "link_to": "Shito SMS Message",
+      "type": "DocType"
+    },
+    {
+      "color": "Orange",
+      "doc_view": "List",
+      "label": "Shito SMS Campaign",
+      "link_to": "Shito SMS Campaign",
       "type": "DocType"
     }
   ],

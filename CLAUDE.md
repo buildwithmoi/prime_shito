@@ -164,8 +164,26 @@ template, `pricing.money()` avoids `frappe.utils.fmt_money` (which prefixes the 
 asserts customer-facing error copy stays GSM-7. Any new customer-facing string must hold that line.
 
 SMS goes through **Frappe's built-in SMS Settings** (Core > SMS Settings) pointed at Arkesel's HTTP
-API — not a custom gateway. Note the built-in sender loops one HTTP request per recipient, which is
-fine for order notifications but will need Arkesel's bulk endpoint for advertisement campaigns.
+API — not a custom gateway. The built-in sender loops one HTTP request per recipient, which is fine
+at this business's list sizes; Arkesel's bulk endpoint is the optimisation if campaigns reach
+thousands.
+
+### Marketing SMS is consent-gated, in SQL
+
+`shito/campaigns.py` filters `marketing_opt_in = 1 AND is_blocked = 0` **inside the query**, never in
+Python, so there is no code path that can forget the check. That includes the Manual List audience: a
+hand-typed number that has unsubscribed stays unsubscribed, and a number never seen before gets
+nothing, because it has given no consent at all. Consent is re-checked at send time as well as at
+preview, since someone may opt out between the two.
+
+Transactional order SMS is contractual and carries no opt-out footer. Marketing SMS always does, and
+that footer is included when the message is priced because the customer pays for those characters
+too. `unsubscribe()` is guest-accessible on purpose — an opt-out behind a login is not an opt-out —
+and answers identically for known and unknown numbers so it cannot be used to probe who has ordered.
+
+Campaigns never send on a single click: **Preview Recipients** resolves the audience and shows count,
+segments and estimated cost, then sending needs `SEND` typed into a dialog. Sends commit per
+recipient, so a job that dies halfway resumes without texting anyone twice.
 
 ### The doppio libs are vendored, not imported
 
